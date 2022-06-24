@@ -1,0 +1,10 @@
+GET http://127.0.0.1:5000/booking/all
+
+###
+
+POST http://localhost:5000/auth/register
+Content-Type: application/json
+
+{
+    "username": "Thang"
+}
