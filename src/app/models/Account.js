@@ -8,6 +8,7 @@ const Account = new Schema({
     password: {type: String, required: true},
     status: {type: String, required: true, default: 'offline'},
     role: {type: String, required: true, default: 'customer'},
+    refreshToken: {type: String},
     user_id: {type: mongoose.Schema.Types.ObjectId}
 }, {
     timestamps: true,
