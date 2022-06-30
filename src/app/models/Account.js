@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const mongooseDelete = require('mongoose-delete')
 
 const Schema = mongoose.Schema
 
@@ -11,5 +12,8 @@ const Account = new Schema({
 }, {
     timestamps: true,
 })
+Account.plugin(mongooseDelete, {
+    deletedAt : true, 
+    overrideMethods: 'all'})
 
 module.exports = mongoose.model('Account', Account)

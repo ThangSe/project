@@ -2,10 +2,12 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const bookingRouter = require('./booking')
 const authRouter = require('./auth')
+const accountRouter = require('./account')
 
 function route(app) {
     app.use('/auth', authRouter)
-    app.use('/booking', bookingRouter) 
+    app.use('/booking', bookingRouter)
+    app.use('/account', accountRouter)
     app.use((req, res, next) => {
         res.status(404)
         res.json({

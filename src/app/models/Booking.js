@@ -13,10 +13,10 @@ const Booking = new Schema({
         ward: {type: String, required: true},
         street: {type: String, required: true}
     },
-    time: {type: Date, required: true},
+    time: {type: Date},
     status: {type: String, required: true},
     phonenum: {type: String, required: true},
-    cus_id: {type: mongoose.Schema.Types.ObjectId, required: true}
+    cus_id: {type: mongoose.Schema.Types.ObjectId}
 }, {
     timestamps: true,
 })
