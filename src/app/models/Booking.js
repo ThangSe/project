@@ -16,7 +16,7 @@ const Booking = new Schema({
     time: {type: Date},
     status: {type: String, required: true},
     phonenum: {type: String, required: true},
-    cus_id: {type: mongoose.Schema.Types.ObjectId}
+    acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"}
 }, {
     timestamps: true,
 })

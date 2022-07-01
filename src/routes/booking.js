@@ -4,4 +4,5 @@ const bookingController = require('../app/controllers/BookingController')
 router.get('/all', bookingController.show)
 router.get('/:id', bookingController.search)
 router.post('/create', bookingController.create)
+router.put('/:id', bookingController.updateBookingById)
 module.exports = router

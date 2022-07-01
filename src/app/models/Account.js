@@ -9,7 +9,10 @@ const Account = new Schema({
     status: {type: String, required: true, default: 'offline'},
     role: {type: String, required: true, default: 'customer'},
     refreshToken: {type: String},
-    user_id: {type: mongoose.Schema.Types.ObjectId}
+    user_id: {type: mongoose.Schema.Types.ObjectId},
+    booking:[
+        {type: mongoose.Schema.Types.ObjectId, ref:"booking"}
+    ]
 }, {
     timestamps: true,
 })
@@ -17,4 +20,4 @@ Account.plugin(mongooseDelete, {
     deletedAt : true, 
     overrideMethods: 'all'})
 
-module.exports = mongoose.model('Account', Account)
+module.exports = mongoose.model('account', Account)
