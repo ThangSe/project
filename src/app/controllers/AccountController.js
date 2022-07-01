@@ -28,7 +28,7 @@ class AccountController {
             })
             .catch(next)
     }
-    updateAccountById(req, res) {
+    async updateAccountById(req, res) {
         try {
             const pass = req.body.password
             const hashed = await bcrypt.hash(pass, 10)

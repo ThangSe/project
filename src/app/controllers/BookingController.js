@@ -1,6 +1,6 @@
 const Booking = require('../models/Booking')
 const Account =require("../models/Account")
-
+const Buffer = require('buffer/').Buffer
 class BookingController {
     show(req, res, next) {
        Booking.find({})
@@ -20,10 +20,15 @@ class BookingController {
 
     async create(req, res) {
         try {
+             const token = req.headers.token
+             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+             const acc_id = accountInfo.id
              const booking = new Booking(req.body)
              const saveBooking = await booking.save()
-             if(req.body.acc_id) {
-                const account =  Account.findById(req.body.acc_id)
+             const updateBooking = await Booking.findById(saveBooking.id)
+             await updateBooking.updateOne({$set: {acc_id: acc_id}})
+             if(acc_id) {
+                const account =  Account.findById(acc_id)
                 await account.updateOne({$push: {booking: saveBooking._id}}) 
              }
              res.status(200).json(saveBooking)
