@@ -16,12 +16,18 @@ db.connect()
 
 //app.use(helmet())
 app.use(bodyParser.json({limit:"50mb"}))
-app.use(cors())
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*")
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-    next()
-  })
+const whitelist = ['http://localhost:3000', 'https://computer-services.netlify.app/']
+const corsOptions = {
+  credentials: true,
+  origin: (origin, callback) => {
+    if(whitelist.includes(origin))
+      return callback(null, true)
+
+      callback(new Error('Not allowed by CORS'))
+  }
+}
+
+app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(morgan('common'))
 app.use(express.json())
