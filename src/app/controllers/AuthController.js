@@ -56,7 +56,7 @@ class AuthController {
             const newRefreshToken = authController.generateRefreshToken(account)
             res.cookie("refreshToken", newRefreshToken, {
                 httpOnly: true,
-                secure:false,
+                secure:true,
                 path: "/",
                 sameSite:"none"
             })
@@ -82,7 +82,7 @@ class AuthController {
             const update = {refreshToken: refreshToken}
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
-                secure:false,
+                secure:true,
                 path: "/",
                 sameSite:"none"
             })
