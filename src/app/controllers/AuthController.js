@@ -56,9 +56,9 @@ class AuthController {
             const newRefreshToken = authController.generateRefreshToken(account)
             res.cookie("refreshToken", newRefreshToken, {
                 httpOnly: true,
-                secure: true,
+                secure:true,
                 path: "/",
-                sameSite: "strict"
+                sameSite:"none"
             })
             res.status(200).json({ accessToken: newAccessToken })
         })
@@ -82,9 +82,9 @@ class AuthController {
             const update = { refreshToken: refreshToken }
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
-                secure: true,
+                secure:true,
                 path: "/",
-                sameSite: "none"
+                sameSite:"none"
             })
             const { password, ...others } = account._doc
             Account.findOneAndUpdate(filter, update, {
