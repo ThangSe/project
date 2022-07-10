@@ -10,8 +10,8 @@ class AuthController {
         const pass = req.body.password
         const hashed = await bcrypt.hash(pass, 10)
         const username = req.body.username
-        const existedAccount = await Account.findOne({username: username})
-        if(existedAccount) return res.status(404).json("user is existed")
+        const existedAccount = await Account.findOne({ username: username })
+        if (existedAccount) return res.status(404).json("user is existed")
         const newAccount = await new Account({
             username: username,
             password: hashed
@@ -27,27 +27,27 @@ class AuthController {
             id: account.id,
             username: account.username,
             role: account.role
-        },process.env.ACCESS_TOKEN_SECRET,
-        {expiresIn: "60s"}
+        }, process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: "60s" }
         )
     }
     generateRefreshToken(account) {
         return jwt.sign({
             id: account.id,
-            username: account.username,        
+            username: account.username,
             role: account.role
-        },process.env.REFRESH_TOKEN_SECRET,
-        {expiresIn: "1d"}
+        }, process.env.REFRESH_TOKEN_SECRET,
+            { expiresIn: "1d" }
         )
     }
 
     async requestRefreshToken(req, res) {
         const refreshToken = req.cookies.refreshToken
         if (!refreshToken) return res.status(401).json("You're not authenicated")
-        const existedToken = await Account.findOne({refreshToken: refreshToken})
-        if(!existedToken) return res.status(403).json("Token is not valid")
+        const existedToken = await Account.findOne({ refreshToken: refreshToken })
+        if (!existedToken) return res.status(403).json("Token is not valid")
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, account) => {
-            if(err) {
+            if (err) {
                 console.log(err)
             }
             // create new accessToken, refreshToken
@@ -56,51 +56,56 @@ class AuthController {
             const newRefreshToken = authController.generateRefreshToken(account)
             res.cookie("refreshToken", newRefreshToken, {
                 httpOnly: true,
-                secure:false,
+                secure: true,
                 path: "/",
-                sameSite:"strict"
+                sameSite: "strict"
             })
-            res.status(200).json({accessToken: newAccessToken})
+            res.status(200).json({ accessToken: newAccessToken })
         })
     }
 
     async login(req, res, next) {
-        const account = await Account.findOne({username: req.body.username})
-        if(!account) {
+        const account = await Account.findOne({ username: req.body.username })
+        if (!account) {
             return res.status(404).json("User not existed")
         }
         const validPassword = await bcrypt.compare(
             req.body.password,
             account.password
         )
-        if(!validPassword) return res.status(404).json("Wrong password")
-        if(account && validPassword) {
-            const authController = new AuthController() 
+        if (!validPassword) return res.status(404).json("Wrong password")
+        if (account && validPassword) {
+            const authController = new AuthController()
             const accessToken = authController.generateAccessToken(account)
             const refreshToken = authController.generateRefreshToken(account)
-            const filter = {username: account.username}
-            const update = {refreshToken: refreshToken}
+            const filter = { username: account.username }
+            const update = { refreshToken: refreshToken }
             res.cookie("refreshToken", refreshToken, {
                 httpOnly: true,
-                secure:false,
+                secure: true,
                 path: "/",
-                sameSite:"strict"
+                sameSite: "none"
             })
-            const {password, ...others} = account._doc
+            const { password, ...others } = account._doc
             Account.findOneAndUpdate(filter, update, {
-                new: true            
+                new: true
             })
-            .then(() => res.status(200).json({...others, accessToken}))
-            .catch(next)
+                .then(() => res.status(200).json({ ...others, accessToken }))
+                .catch(next)
         }
     }
     async logout(req, res, next) {
-        res.clearCookie("refreshToken")
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: true,
+            path: "/",
+            sameSite: "none"
+        })
         const token = req.headers.token
         const account = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        Account.findOneAndUpdate({username: account.username}, {refreshToken: ""}, {new: true})
-                .then(() => res.status(200).send("Logout success"))
-                .catch(next)
+        Account.findOneAndUpdate({ username: account.username }, { refreshToken: "" }, { new: true })
+            .then(() => res.status(200).send("Logout success"))
+            .catch(next)
     }
 }
 
