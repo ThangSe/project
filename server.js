@@ -16,7 +16,7 @@ db.connect()
 
 //app.use(helmet())
 app.use(bodyParser.json({limit:"50mb"}))
-const whitelist = ['http://localhost:3000', 'https://computer-services.netlify.app/','https://computer-services-api.herokuapp.com']
+const whitelist = ['http://localhost:3000', 'https://computer-services.netlify.app/','https://computer-services-api.herokuapp.com/', 'http://localhost:5000']
 const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
