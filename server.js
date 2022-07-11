@@ -21,11 +21,10 @@ const corsOptions = {
   credentials: true,
   origin: (origin, callback) => {
     if(!origin || whitelist.indexOf(origin) !== -1) {
-      console.log(origin)
       callback(null, true)     
     }
     else {
-      callback(new Error('Not allowed by CORS x'))
+      callback(new Error('Not allowed by CORS'))
     }
   }
 }
