@@ -41,7 +41,7 @@ class AuthController {
         )
     }
 
-    async requestRefreshToken(req, res) {
+    async requestRefreshToken(req, re, next) {
         const refreshToken = req.cookies.refreshToken
         if (!refreshToken) return res.status(401).json("You're not authenicated")
         const existedToken = await Account.findOne({ refreshToken: refreshToken })

@@ -11,7 +11,10 @@ class BookingController {
     }
 
     search(req, res, next) {
-        Booking.findById(req.params.id).populate("acc_id")
+        Booking.findById(req.params.id).populate({
+            path: 'acc_id',
+            select: 'username'
+        })
             .then(booking => {
                 res.json(booking)
             })
