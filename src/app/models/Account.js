@@ -9,7 +9,8 @@ const Account = new Schema({
     status: {type: String, required: true, default: 'offline'},
     role: {type: String, required: true, default: 'customer'},
     refreshToken: {type: String},
-    user_id: {type: mongoose.Schema.Types.ObjectId},
+    user_id: {type: mongoose.Schema.Types.ObjectId, ref:"user"},
+    agency_id: {type: mongoose.Schema.Types.ObjectId, ref:"agency"},
     booking:[
         {type: mongoose.Schema.Types.ObjectId, ref:"booking"}
     ]

@@ -1,4 +1,5 @@
 const Account = require("../models/Account")
+const User = require("../models/User")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 const dotenv = require('dotenv')
@@ -6,20 +7,33 @@ const Buffer = require('buffer/').Buffer
 dotenv.config()
 
 class AuthController {
-    async register(req, res, next) {
-        const pass = req.body.password
-        const hashed = await bcrypt.hash(pass, 10)
-        const username = req.body.username
-        const existedAccount = await Account.findOne({ username: username })
-        if (existedAccount) return res.status(404).json("user is existed")
-        const newAccount = await new Account({
-            username: username,
-            password: hashed
-        })
-        const account = await newAccount
-        account.save()
-            .then(() => res.json(account))
-            .catch(next)
+    //POST
+    async register(req, res) {
+        try {
+            const pass = req.body.password
+            const hashed = await bcrypt.hash(pass, 10)
+            const username = req.body.username
+            const existedAccount = await Account.findOne({ username: username })
+            if (existedAccount) return res.status(404).json("user is existed")
+            const newAccount = await new Account({
+                username,
+                password: hashed
+            })
+            const account = await newAccount
+            const saveAccount = await account.save()
+            const user = new User({phonenum: username})
+            const saveUser = await user.save()
+            const updateUser = await User.findById(saveUser.id)
+            await updateUser.updateOne({$set: {acc_id: saveAccount.id}})
+            if(saveAccount.id) {
+                const account = Account.findById(saveAccount.id)
+                await account.updateOne({$set: {user_id: saveUser._id}})
+            }
+            res.status(200).json(saveAccount)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+        
     }
 
     generateAccessToken(account) {
@@ -28,7 +42,7 @@ class AuthController {
             username: account.username,
             role: account.role
         }, process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: "60s" }
+            { expiresIn: "1h" }
         )
     }
     generateRefreshToken(account) {
