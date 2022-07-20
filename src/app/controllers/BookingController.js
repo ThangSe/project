@@ -15,7 +15,7 @@ class BookingController {
                 bookings = await Booking.find({status:req.query.status}).sort({_id:-1}).limit(req.query.lastest)
                 return res.status(200).json(bookings)
             }
-            else if(req.query.status) {
+            else if(req.query.status == "accept" || req.query.status == "pending") {
                 var flag = 1
                 if(sort == "desc" ) {
                     flag = -1
