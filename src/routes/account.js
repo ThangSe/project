@@ -3,7 +3,7 @@ const middlewareController = require("../app/controllers/MiddlewareController")
 const router = require("express").Router()
 
 router.get("/all", middlewareController.verifyTokenManager, accountController.getAllAccounts)
-router.get("/lastest-account", middlewareController.verifyTokenManager, accountController.showLastestAccount)
+router.get("/all/lastest-account", middlewareController.verifyTokenManager, accountController.showLastestAccount)
 router.get("/:id", /*middlewareController.verifyTokenManager,*/ accountController.getAccountById)
 router.delete("/:id", middlewareController.verifyTokenAdmin, accountController.deleteAccount)
 router.patch('/:id', /*middlewareController.verifyTokenManager,*/ accountController.updateAccountById)

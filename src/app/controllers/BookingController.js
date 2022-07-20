@@ -3,41 +3,22 @@ const Account = require("../models/Account")
 const Order = require("../models/Order")
 const Buffer = require('buffer/').Buffer
 class BookingController {
-    showAllBooking(req, res, next) {
-       Booking.find({})
-        .then(bookings => {
-            res.json(bookings)
-        })
-        .catch(next)
-    }
-
-    showAllBookingByAccount (req, res, next) {
-        const token = req.headers.token
-        const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-        const acc_id = accountInfo.id
-        Booking.find({acc_id: acc_id})
-            .then(bookings => {
-                res.json(bookings)
-            })
-            .catch(next)
-    }
-
-    showAllBookingByStatus (req, res, next) {
-        const status = req.body.status
-        Booking.find({status: status})
-            .then(bookings => {
-                res.json(bookings)
-            })
-            .catch(next)
-    }
-
-    showLastestBooking (req, res, next) {
-        const status = req.body.status
-        Booking.find({status: status}).sort({_id:-1}).limit(10)
-            .then(bookings => {
-                res.json(bookings)
-            })
-            .catch(next)
+    async showAll (req, res) {
+        try {
+            let bookings = await Booking.find({})
+            if(req.query.status) {
+                bookings = await Booking.find({status:req.query.status})
+            }
+            else if(req.query.lastest) {
+                bookings = await Booking.find().sort({_id:-1}).limit(req.query.lastest)
+            }
+            else if(req.query.lastest && req.query.status) {
+                bookings = await Booking.find({status:req.query.status}).sort({_id:-1}).limit(10)
+            }
+            res.status(200).json(bookings)
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 
     searchBookingById(req, res, next) {
