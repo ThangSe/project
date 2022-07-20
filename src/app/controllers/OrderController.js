@@ -9,6 +9,14 @@ class OrderController {
         .catch(next)
     }
 
+    showLastestOrder (req, res, next) {
+        Order.find().sort({_id:-1}).limit(10)
+            .then(orders => {
+                res.json(orders)
+            })
+            .catch(next)
+    }
+
     searchOrderById(req, res, next) {
         Order.findById(req.params.id)
             .then(order => {

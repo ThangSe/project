@@ -22,6 +22,24 @@ class BookingController {
             .catch(next)
     }
 
+    showAllBookingByStatus (req, res, next) {
+        const status = req.body.status
+        Booking.find({status: status})
+            .then(bookings => {
+                res.json(bookings)
+            })
+            .catch(next)
+    }
+
+    showLastestBooking (req, res, next) {
+        const status = req.body.status
+        Booking.find({status: status}).sort({_id:-1}).limit(10)
+            .then(bookings => {
+                res.json(bookings)
+            })
+            .catch(next)
+    }
+
     searchBookingById(req, res, next) {
         Booking.findById(req.params.id).populate({
             path: 'acc_id',

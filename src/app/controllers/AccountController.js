@@ -47,6 +47,14 @@ class AccountController {
             })
             .catch(next)
     }
+
+    showLastestAccount (req, res, next) {
+        Account.find().sort({_id:-1}).limit(10)
+            .then(accounts => {
+                res.json(accounts)
+            })
+            .catch(next)
+    }
     //DELETE /account/:id
     deleteAccount(req, res, next) {
         Account.delete({_id: req.params.id})
