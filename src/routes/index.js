@@ -9,6 +9,7 @@ const serviceRouter = require('./service')
 const orderRouter = require('./order')
 const scheduleRouter = require('./schedule')
 const chartRouter = require('./chart')
+const computerRouter = require('./computer')
 
 function route(app) {
     app.use('/auth', authRouter)
@@ -20,6 +21,7 @@ function route(app) {
     app.use('/service', serviceRouter)
     app.use('/schedule', scheduleRouter)
     app.use('/chart', chartRouter)
+    app.use('/computer', computerRouter)
     app.use((req, res, next) => {
         res.status(404)
         res.json({

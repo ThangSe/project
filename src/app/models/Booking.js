@@ -13,12 +13,11 @@ const Booking = new Schema({
         ward: {type: String, required: true},
         street: {type: String, required: true}
     },
-    time: {type: Date},
+    time: {type: Date, default: Date.now},
     status: {type: String, required: true, default: 'Đang xử lí'},
     phonenum: {type: String, required: true},
     acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
     order_id: {type: mongoose.Schema.Types.ObjectId, ref: "order"},
-    computer_id: {type: mongoose.Schema.Types.ObjectId, ref: "computer"}
 }, {
     timestamps: true,
 })  
