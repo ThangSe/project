@@ -6,7 +6,7 @@ const Buffer = require('buffer/').Buffer
 class AccountController {
     //Register manager accounts
     //POST /account/register
-    async register(req, res) {
+    async registerAccountStaff(req, res) {
         try {
             const pass = req.body.password
             const hashed = await bcrypt.hash(pass, 10)

@@ -5,6 +5,7 @@ const Schema = mongoose.Schema
 
 const Accessory = new Schema({
     name: {type: String, required: true},
+    price: {type: Number},
     description: {type: String, required: true},
     insurance: {type: String, required: true},
     service_id: {type: mongoose.Schema.Types.ObjectId, ref:"service"},

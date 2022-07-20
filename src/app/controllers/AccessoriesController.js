@@ -3,7 +3,7 @@ const Supplier = require('../models/Supplier')
 
 class AccessoriesController {
     //GET /accessory/all-accessories
-    show(req, res, next) {
+    showAllAccessory(req, res, next) {
         Accessory.find({}).populate("service_id").populate("supplier_id")
          .then(accessories => {
              res.json(acceessories)
@@ -12,7 +12,7 @@ class AccessoriesController {
     }
 
     //POST /accessory/create
-    async create(req, res) {
+    async createNewAccessory(req, res) {
         try {
             const accessory = new Accessory(req.body)
             const saveAccessory = await accessory.save()
@@ -36,6 +36,14 @@ class AccessoriesController {
             res.status(200).json(saveSupplier)
         } catch (err) {
             res.status(500).json(err)
+        }
+    }
+
+    async getService(req,res) {
+        try {
+            
+        } catch (err) {
+            
         }
     }
 }

@@ -3,7 +3,7 @@ const Service = require('../models/Service')
 
 class ServiceController {
     //GET /service/all-service
-    show(req, res, next) {
+    showAllService(req, res, next) {
         Service.find({}).populate("accessories_id")
          .then(services => {
              res.json(services)
@@ -12,11 +12,11 @@ class ServiceController {
     }
 
     //POST /service/create-service
-    async create(req, res) {
+    async createNewService(req, res) {
         try {
             const service = new Service(req.body)
             const saveService = await service.save()
-            if(req.body.accessories_id) {
+            if(saveService.hasAccessory) {
             const filter = {_id: req.body.accessories_id}
             const update = {$set: {service_id: saveService._id}}
             await Accessory.findOneAndUpdate(filter, update, {
@@ -29,6 +29,8 @@ class ServiceController {
         }
         
     }
+
+
 }
 
 module.exports = new ServiceController()

@@ -2,14 +2,14 @@ const Account = require("../models/Account")
 const Agency  = require("../models/Agency")
 class AgencyController {
     //GET /agency/all
-    show(req, res, next) {
+    showAllAgency(req, res, next) {
         Agency.find({})
          .then(agencies => {
              res.json(agencies)
          })
          .catch(next)
      }
-     async create(req, res) {
+    async createNewAgency(req, res) {
         try {
              const token = req.headers.token
              const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())

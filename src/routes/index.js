@@ -6,6 +6,7 @@ const accountRouter = require('./account')
 const agencyRouter = require('./agency')
 const accesoryRouter = require('./accessory')
 const serviceRouter = require('./service')
+const orderRouter = require('./order')
 
 function route(app) {
     app.use('/auth', authRouter)
@@ -13,6 +14,7 @@ function route(app) {
     app.use('/account', accountRouter)
     app.use('/agency', agencyRouter)
     app.use('/accessory', accesoryRouter)
+    app.use('/order', orderRouter)
     app.use('/service', serviceRouter)
     app.use((req, res, next) => {
         res.status(404)
