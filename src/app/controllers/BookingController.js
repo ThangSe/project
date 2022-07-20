@@ -21,6 +21,16 @@ class BookingController {
         }
     }
 
+    showAllBookingByAccount (req, res, next) {
+        const token = req.headers.token
+        const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+        const acc_id = accountInfo.id
+        Booking.find({acc_id: acc_id})
+            .then(bookings => {
+                res.json(bookings)
+            })
+            .catch(next)
+    }
     searchBookingById(req, res, next) {
         Booking.findById(req.params.id).populate({
             path: 'acc_id',
