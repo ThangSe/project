@@ -6,7 +6,7 @@ class AccessoriesController {
     showAllAccessory(req, res, next) {
         Accessory.find({}).populate("service_id").populate("supplier_id")
          .then(accessories => {
-             res.json(acceessories)
+             res.json(accessories)
          })
          .catch(next)
     }
