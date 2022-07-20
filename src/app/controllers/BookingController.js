@@ -13,7 +13,7 @@ class BookingController {
                 bookings = await Booking.find().sort({_id:-1}).limit(req.query.lastest)
             }
             else if(req.query.lastest && req.query.status) {
-                bookings = await Booking.find({status:req.query.status}).sort({_id:-1}).limit(10)
+                bookings = await Booking.find({status:req.query.status}).sort({_id:-1}).limit(req.query.lastest)
             }
             res.status(200).json(bookings)
         } catch (err) {
