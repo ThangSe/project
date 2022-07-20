@@ -6,16 +6,27 @@ class BookingController {
     async showAll (req, res) {
         try {
             let bookings = await Booking.find({})
-            if(req.query.status) {
-                bookings = await Booking.find({status:req.query.status})
-            }
-            else if(req.query.lastest) {
-                bookings = await Booking.find().sort({_id:-1}).limit(req.query.lastest)
+            const sort = req.query.sort
+            if(sort == "desc") {
+                bookings = await Booking.find({}).sort({_id:-1})
+                return res.status(200).json(bookings)
             }
             else if(req.query.lastest && req.query.status) {
                 bookings = await Booking.find({status:req.query.status}).sort({_id:-1}).limit(req.query.lastest)
+                return res.status(200).json(bookings)
             }
-            res.status(200).json(bookings)
+            else if(req.query.status) {
+                var flag = 1
+                if(sort == "desc" ) {
+                    flag = -1
+                }
+                bookings = await Booking.find({status:req.query.status}).sort({_id: flag})
+                return res.status(200).json(bookings)
+            }
+            else {
+                return res.status(200).json(bookings)
+            }
+
         } catch (err) {
             res.status(500).json(err)
         }
