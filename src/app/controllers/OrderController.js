@@ -1,14 +1,43 @@
 const Order = require("../models/Order")
+const OrderDetail = require("../models/OrderDetail")
 const Service = require("../models/Service")
 const mongoose = require("mongoose")
 const Buffer = require('buffer/').Buffer
 class OrderController {
+    // GET order/test1
     async showAllServiceToChoose(req, res) {
         try {
             const serviceNoAcc = await Service.find({hasAccessory: false})
             const serviceHasAcc = await Service.aggregate([
                 {
                     $unwind: "$accessories_id"
+                },
+                {
+                    $lookup: {
+                        from: "accessories",
+                        localField: "accessories_id",
+                        foreignField: "_id",
+                        as: "accessories_detail"
+                    }
+                }, 
+                {
+                    $project: {
+                        _id: 0,
+                        name: 1,
+                        description: 1,
+                        type: 1,
+                        "accessories_detail._id": 1,
+                        "accessories_detail.name": 1,
+                        "accessories_detail.description": 1,
+                        "accessories_detail.insurance": 1,
+                        price: {$add: ["$price", {$toInt:{
+                            $reduce: {
+                                input: "$accessories_detail",
+                                initialValue: "",
+                                in: { $concat: [ "$$value", {$substr:["$$this.price", 0, -1]}]}
+                            }
+                        }}]}
+                    }
                 }
             ])
             res.status(200).json({serviceHasAcc, serviceNoAcc})
@@ -16,52 +45,10 @@ class OrderController {
             res.status(500).json(err)
         }
     }
+    //POST /order/addDetailOrder
     async addDetailOrder(req, res) {
         try {
-            let accessory = req.body.accessory
-            if(accessory) {
-                Service.aggregate([
-                    {
-                        $unwind: "$accessories_id"
-                    },
-                    {
-                        $match: {
-                            accessories_id:  new mongoose.Types.ObjectId(accessory)
-                        }
-                    },
-                    {
-                        $lookup: {
-                            from: "accessories",
-                            localField: "accessories_id",
-                            foreignField: "_id",
-                            as: "accessories_detail"
-                        }
-                    }, 
-                    {
-                        $project: {
-                            _id: 0,
-                            name: 1,
-                            description: 1,
-                            type: 1,
-                            "accessories_detail._id": 1,
-                            "accessories_detail.name": 1,
-                            "accessories_detail.description": 1,
-                            "accessories_detail.insurance": 1,
-                            price: {$add: ["$price", {$toInt:{
-                                $reduce: {
-                                    input: "$accessories_detail",
-                                    initialValue: "",
-                                    in: { $concat: [ "$$value", {$substr:["$$this.price", 0, -1]}]}
-                                }
-                            }}]}
-                        }
-                    }
-                ])
-            }
-            else {
-                return res.status(200).json()
-            }
-            
+               const insertDetail = OrderDetail.insertMany(req.body)
         } catch (err) {
             res.status(500).json(err)
         }
