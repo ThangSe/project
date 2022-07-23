@@ -1,12 +1,84 @@
 const Order = require("../models/Order")
+const Service = require("../models/Service")
+const mongoose = require("mongoose")
 const Buffer = require('buffer/').Buffer
 class OrderController {
+    async showAllServiceToChoose(req, res) {
+        try {
+            const serviceNoAcc = await Service.find({hasAccessory: false})
+            const serviceHasAcc = await Service.aggregate([
+                {
+                    $unwind: "$accessories_id"
+                }
+            ])
+            res.status(200).json({serviceHasAcc, serviceNoAcc})
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async addDetailOrder(req, res) {
+        try {
+            let accessory = req.body.accessory
+            if(accessory) {
+                Service.aggregate([
+                    {
+                        $unwind: "$accessories_id"
+                    },
+                    {
+                        $match: {
+                            accessories_id:  new mongoose.Types.ObjectId(accessory)
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "accessories",
+                            localField: "accessories_id",
+                            foreignField: "_id",
+                            as: "accessories_detail"
+                        }
+                    }, 
+                    {
+                        $project: {
+                            _id: 0,
+                            name: 1,
+                            description: 1,
+                            type: 1,
+                            "accessories_detail._id": 1,
+                            "accessories_detail.name": 1,
+                            "accessories_detail.description": 1,
+                            "accessories_detail.insurance": 1,
+                            price: {$add: ["$price", {$toInt:{
+                                $reduce: {
+                                    input: "$accessories_detail",
+                                    initialValue: "",
+                                    in: { $concat: [ "$$value", {$substr:["$$this.price", 0, -1]}]}
+                                }
+                            }}]}
+                        }
+                    }
+                ])
+            }
+            else {
+                return res.status(200).json()
+            }
+            
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
     showAllOrder(req, res, next) {
-       Order.find({})
-        .then(orders => {
-            res.json(orders)
-        })
-        .catch(next)
+        Order.aggregate([{$project: {
+            status : 1
+        }}])
+            .then(orders => {
+                res.json(orders)
+            })
+            .catch(next)
+    //    Order.find({})
+    //     .then(orders => {
+    //         res.json(orders)
+    //     })
+    //     .catch(next)
     }
 
     showLastestOrder (req, res, next) {

@@ -41,7 +41,7 @@ class AccountController {
     }
     //GET /account
     getAllAccounts(req, res, next) {
-        Account.find({})
+        Account.find({}).populate("booking")
             .then(accounts => {
                 res.status(200).json(accounts)
             })
