@@ -7,10 +7,10 @@ class BookingController {
         try {
             const {page = 1, limit = 10} = req.query
             const sort = req.query.sort
-            let bookings = await Booking.find({}).limit(limit * 1).skip((page - 1) * limit)
-            let count = await Booking.find().count()/10      
+            let bookings = await Booking.find().limit(limit * 1).skip((page - 1) * limit)
+            let count = await Booking.find().count()/10
             if(sort == "desc" && !req.query.status) {
-                bookings = await Booking.find({}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit)
+                bookings = await Booking.find().sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit)
                 return res.status(200).json({count: Math.ceil(count), bookings})
             }
             else if(req.query.status) {
@@ -18,10 +18,12 @@ class BookingController {
                 if(sort == "desc") {
                     flag = -1
                     bookings = await Booking.find({status:req.query.status}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit)
+                    count = await Booking.find({status:req.query.status}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }
                 else {
                     bookings = await Booking.find({status:req.query.status}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit)
+                    count = await Booking.find({status:req.query.status}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }      
             }
