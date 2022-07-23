@@ -8,7 +8,7 @@ class BookingController {
             const {page = 1, limit = 10} = req.query
             const sort = req.query.sort
             let bookings = await Booking.find({}).limit(limit * 1).skip((page - 1) * limit)      
-            if(sort == "desc") {
+            if(sort == "desc" && !req.query.status) {
                 bookings = await Booking.find({}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit)
                 return res.status(200).json(bookings)
             }
