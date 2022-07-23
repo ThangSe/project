@@ -1,5 +1,5 @@
 const Order = require("../models/Order")
-const OrderDetail = require("../models/OrderDetail")
+// const OrderDetail = require("../models/OrderDetail")
 const Service = require("../models/Service")
 const mongoose = require("mongoose")
 const Buffer = require('buffer/').Buffer
@@ -48,7 +48,7 @@ class OrderController {
     //POST /order/addDetailOrder
     async addDetailOrder(req, res) {
         try {
-               const insertDetail = OrderDetail.insertMany(req.body)
+            //    const insertDetail = OrderDetail.insertMany(req.body)
         } catch (err) {
             res.status(500).json(err)
         }
