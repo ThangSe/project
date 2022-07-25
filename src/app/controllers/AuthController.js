@@ -124,7 +124,7 @@ class AuthController {
         const token = req.headers.token
         const account = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
         Account.findOneAndUpdate({ username: account.username }, { refreshToken: "" }, { new: true })
-            .then(() => res.status(200).send("Logout success"))
+            .then(() => res.status(200).json("Logout success"))
             .catch(next)
     }
 }
