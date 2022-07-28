@@ -94,13 +94,27 @@ class OrderController {
     }
     async acceptOrder(req, res) {
         try {
-            const booking = await Booking.findById(req.body.id)
-            await booking.updateOne({$set: {status: 'accepted'}})
-            const order = new Order()
-            const saveOrder = await order.save()
-            const updateOrder = await Order.findById(saveOrder.id)
-            await updateOrder.updateOne({$set: {booking_id: booking.id}})
+            const order = await Order.findById(req.body.id)
+            await order.updateOne({$set: {status: 'pending'}})
             res.status(200).json("Accepted")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async cancelOrder(req, res) {
+        try {
+            const order = await Order.findById(req.body.id)
+            await order.updateOne({$set: {status: 'cancel'}})
+            res.status(200).json("Cancel")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async completeOrder(req, res) {
+        try {
+            const order = await Order.findById(req.body.id)
+            await order.updateOne({$set: {status: 'completed'}})
+            res.status(200).json("Completed")
         } catch (err) {
             res.status(500).json(err)
         }

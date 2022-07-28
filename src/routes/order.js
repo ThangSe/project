@@ -7,4 +7,6 @@ router.get('/all', /*middlewareController.verifyTokenManager,*/ orderController.
 router.get('/:id', orderController.searchOrderById)
 router.patch('/:id', orderController.updateOrderById)
 router.patch('/accpet-order', orderController.acceptOrder)
+router.patch('/complete-order', orderController.completeOrder)
+router.patch('/cancel-order', orderController.cancelOrder)
 module.exports = router

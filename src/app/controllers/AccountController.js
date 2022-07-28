@@ -47,7 +47,14 @@ class AccountController {
             })
             .catch(next)
     }
-
+    //GET /account/username
+    getAccountByUsername(req, res, next) {
+        Account.findOne({username: req.params.username}).populate("user_id")
+            .then(account => {
+                res.status(200).json(account)
+            })
+            .catch(next)
+    }
     showLastestAccount (req, res, next) {
         Account.find().sort({_id:-1}).limit(10)
             .then(accounts => {

@@ -85,6 +85,7 @@ class BookingController {
             res.status(500).json(err)
         }
     }
+    //PATCH /booking/accept-booking (Manager)
     async acceptBooking(req, res) {
         try {
             const booking = await Booking.findById(req.body.id)
@@ -99,6 +100,26 @@ class BookingController {
             res.status(500).json(err)
         }
     }
+    //PATCH /booking/cancel-booking (Customer)
+    async cancelBooking(req, res) {
+        try {
+            const booking = await Booking.findById(req.body.id).populate("order_id")
+            if(booking.status == "pending") {
+                await booking.updateOne({$set: {status: 'cancel'}})
+                return res.status(200).json("Cancel successful")
+            }
+            else if(booking.status == "accepted" && booking.order_id.status == "waiting") {
+                await booking.updateOne({$set: {status: 'cancel'}})
+                return res.status(200).json("Cancel successful")
+            }
+            else {
+                return res.status(200).json("Cannot cancel")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
 }
 
 module.exports = new BookingController()
