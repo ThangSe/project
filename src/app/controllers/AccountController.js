@@ -3,6 +3,7 @@ const Agency = require("../models/Agency")
 const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer/').Buffer
+const multer = require('multer')
 class AccountController {
     //Register manager accounts
     //POST /account/register
@@ -94,7 +95,7 @@ class AccountController {
             res.status(500).json(err)
         }
     }
-    //PUT /account/editprofile
+    //PATCH /account/editprofile (customer)
     async updateProfileAccount(req, res) {
         try {
             const token = req.headers.token
@@ -103,6 +104,36 @@ class AccountController {
             const user = User.findOne({acc_id: acc_id})
             await user.updateOne({$set: req.body})
             res.status(200).json("Update profile successfully")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    //PATCH /account/editimgprofile (customer)
+    async updateImgProfileAccount(req, res) {
+        try {
+            const Storage = multer.diskStorage({
+                destination: "uploads",
+                filename: (req, file, cb) => {
+                    cb(null, file.originalname)
+                }
+            })
+            const upload = multer({
+                storage: Storage
+            }).single('img')
+            // const token = req.headers.token
+            // const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            // const acc_id = accountInfo.id
+            const user = User.findOne({acc_id: '62daebff3dc79b459ea22f1f'})
+            // upload(req, res, (err)=>{
+            //     if(err) {
+            //         return res.status(500).json(err)
+            //     }
+            //     else {
+            //         user.updateOne({$set: {img: {data: req.file.filename, contentType: 'image/png'}}})
+            //         return res.status(200).json("Upload success")
+            //     }
+            // })
+            res.status(200).json(user)         
         } catch (err) {
             res.status(500).json(err)
         }

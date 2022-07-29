@@ -13,7 +13,7 @@ const User = new Schema({
     },
     phonenum: {type: String, required: true},
     birth: {type: Date, default: Date.now},
-    img: {type: String, default: 'Empty'},
+    img: {data: Buffer, contentType: String},
     acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"}
 }, {
     timestamps: true,
