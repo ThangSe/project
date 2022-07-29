@@ -13,6 +13,9 @@ const Account = new Schema({
     agency_id: {type: mongoose.Schema.Types.ObjectId, ref:"agency"},
     booking:[
         {type: mongoose.Schema.Types.ObjectId, ref:"booking"}
+    ],
+    workslot_id:[
+        {type: mongoose.Schema.Types.ObjectId, ref:"workslot"}
     ]
 }, {
     timestamps: true,
