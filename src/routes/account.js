@@ -9,7 +9,7 @@ router.get("/byId/:id", /*middlewareController.verifyTokenManager,*/ accountCont
 router.delete("/:id", middlewareController.verifyTokenAdmin, accountController.deleteAccount)
 router.patch('/:id', /*middlewareController.verifyTokenManager,*/ accountController.updateAccountById)
 router.patch("/:id/restore", middlewareController.verifyTokenManager,  accountController.restoreAccount)
-router.patch("/editprofile",  accountController.updateProfileAccount)
+router.patch("/editprofile",  middlewareController.verifyToken, accountController.updateProfileAccount)
 router.post("/register-staff", accountController.registerAccountStaff)
-router.patch("/editimgprofile", accountController.updateImgProfileAccount)
+router.patch("/editimgprofile", middlewareController.verifyToken, accountController.updateImgProfileAccount)
 module.exports = router

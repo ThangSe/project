@@ -1,6 +1,7 @@
 const Account = require("../models/Account")
 const Agency = require("../models/Agency")
 const User = require("../models/User")
+const ImgTest = require("../models/ImgTest")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer/').Buffer
 const multer = require('multer')
@@ -111,29 +112,28 @@ class AccountController {
     //PATCH /account/editimgprofile (customer)
     async updateImgProfileAccount(req, res) {
         try {
-            const Storage = multer.diskStorage({
+            const storage = multer.diskStorage({
                 destination: "uploads",
                 filename: (req, file, cb) => {
                     cb(null, file.originalname)
                 }
             })
             const upload = multer({
-                storage: Storage
+                storage: storage
             }).single('img')
-            // const token = req.headers.token
-            // const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-            // const acc_id = accountInfo.id
-            const user = User.findOne({acc_id: '62daebff3dc79b459ea22f1f'})
-            // upload(req, res, (err)=>{
-            //     if(err) {
-            //         return res.status(500).json(err)
-            //     }
-            //     else {
-            //         user.updateOne({$set: {img: {data: req.file.filename, contentType: 'image/png'}}})
-            //         return res.status(200).json("Upload success")
-            //     }
-            // })
-            res.status(200).json(user)         
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const user = await User.findOne({acc_id: acc_id})
+            upload(req, res, (err)=>{
+                if(err) {
+                    return res.status(500).json(err)
+                }
+                else {
+                    user.updateOne({$set: {img: {data: req.file.filename, contentType: "image/png"}}})
+                    return res.status(200).json("Upload success")
+                }
+            })       
         } catch (err) {
             res.status(500).json(err)
         }
