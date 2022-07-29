@@ -20,6 +20,6 @@ const Booking = new Schema({
     order_id: {type: mongoose.Schema.Types.ObjectId, ref: "order"}
 }, {
     timestamps: true,
-})
+})  
 
 module.exports = mongoose.model('booking', Booking)
