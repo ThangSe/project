@@ -1,7 +1,6 @@
 const Account = require("../models/Account")
 const Agency = require("../models/Agency")
 const User = require("../models/User")
-const ImgTest = require("../models/ImgTest")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer/').Buffer
 const multer = require('multer')
