@@ -4,9 +4,9 @@ const Schema = mongoose.Schema
 
 const Schedule = new Schema({
     date: {type: Date, required: true},
-    slots: [{
-        slot_id: {type: mongoose.Schema.Types.ObjectId, ref:"slot"}   
-    }],
+    slots: [
+        {type: mongoose.Schema.Types.ObjectId, ref:"slot"}
+    ],
     status: {type: String, required: true, default: 'open'}
 }, {
     timestamps: true,
