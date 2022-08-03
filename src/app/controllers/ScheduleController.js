@@ -1,4 +1,5 @@
 const parse = require('date-fns/parse')
+const isDate = require('date-fns/isDate')
 const Schedule = require('../models/Schedule')
 const Slot = require('../models/Slot')
 const WorkSlot = require('../models/WorkSlot')
@@ -117,16 +118,19 @@ class ScheduleController {
             res.status(500).json(err)
         }
     }
-
+    
     async assignWorkSlotToOrder (req, res) {
 
     }
 
     async showWorkSlotForAssign (req, res) {
         try {
-            
+            const {dateString} = req.query
+            const date = parse(dateString, 'yyyy-MM-dd', new Date())    
+            let schedule = await Schedule.findOne({date: date}).populate("slots")
+            res.status(200).json(schedule)
         } catch (err) {
-            
+            res.status(500).json(err)
         }
     }
 

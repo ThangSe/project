@@ -92,7 +92,7 @@ class AccountController {
             })
             .catch(next)
     }
-    //PATCH /account/:id change password(customer)
+    //PATCH /change-password change password(customer)
     async updateAccountById(req, res) {
         try {
             const token = req.headers.token
