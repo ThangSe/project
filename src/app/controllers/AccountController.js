@@ -1,6 +1,7 @@
 const Account = require("../models/Account")
 const Agency = require("../models/Agency")
 const User = require("../models/User")
+const Booking = require("../models/Booking")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer/').Buffer
 const multer = require('multer')
@@ -40,9 +41,17 @@ class AccountController {
         }
         
     }
-    //GET /account
+    //GET /account/all
     getAllAccounts(req, res, next) {
         Account.find({}).populate("booking")
+            .then(accounts => {
+                res.status(200).json(accounts)
+            })
+            .catch(next)
+    }
+    //GET /account/account-detail
+    getAllAccountsDetail(req, res, next) {
+        Account.find({}).populate("booking").populate("user_id")
             .then(accounts => {
                 res.status(200).json(accounts)
             })
@@ -83,14 +92,47 @@ class AccountController {
             })
             .catch(next)
     }
-    //PATCH /account/:id
+    //PATCH /account/:id change password(customer)
     async updateAccountById(req, res) {
         try {
-            const pass = req.body.password
-            const hashed = await bcrypt.hash(pass, 10)
-            const account = await Account.findById(req.params.id)
-            await account.updateOne({$set: {"password": hashed}})
-            res.status(200).json("Update successfully")
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const oldPass = req.body.oldpass
+            const repeatPass = req.body.repeatpass
+            const newPass = req.body.newpass
+            const account = await Account.findById(acc_id)
+            const validOldPass = await bcrypt.compare(
+                oldPass,
+                account.password
+            )
+            const validRepeatPass  = await bcrypt.compare(
+                repeatPass,
+                account.password
+            )
+            if(oldPass.localeCompare(repeatPass)) {
+                return res.status(404).json("Old pass doesn't match")
+            }
+            else if(!validOldPass) {
+                return res.status(404).json("Wrong password")
+            }
+            else if (validOldPass && validRepeatPass) {
+                const hashed = await bcrypt.hash(newPass, 10)     
+                await account.updateOne({$set: {"password": hashed}})
+                res.status(200).json("Update successfully")
+            }    
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    //GET /account/view-profile (customer)
+    async viewOwnedProfile(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const account = await Account.findById(acc_id).populate("user_id")
+            res.status(200).json(account.user_id)
         } catch (err) {
             res.status(500).json(err)
         }
@@ -133,6 +175,18 @@ class AccountController {
                     return res.status(200).json("Upload success")
                 }
             })       
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    //GET /account/view-booking-history (customer)
+    async viewBookingHistory(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const account = await Account.findById(acc_id).populate("booking")
+            res.status(200).json(account.booking)
         } catch (err) {
             res.status(500).json(err)
         }

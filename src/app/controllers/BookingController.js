@@ -103,7 +103,13 @@ class BookingController {
     //PATCH /booking/cancel-booking (Customer)
     async cancelBooking(req, res) {
         try {
-            const booking = await Booking.findById(req.body.id).populate("order_id")
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const booking = await Booking.findOne({$and:[
+                {_id: req.body.id},
+                {acc_id: acc_id}    
+            ]}).populate("order_id")
             if(booking.status == "pending") {
                 await booking.updateOne({$set: {status: 'cancel'}})
                 return res.status(200).json("Cancel successful")
