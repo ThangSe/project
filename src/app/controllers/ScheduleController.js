@@ -111,6 +111,40 @@ class ScheduleController {
                         foreignField: "_id",
                         as: "slots"
                     }
+                },
+                {
+                    $unwind: "$slots"
+                },
+                {
+                    $unwind: "$slots.work_slot"
+                },
+                {
+                    $lookup: {
+                        from: "workslots",
+                        localField: "slots.work_slot",
+                        foreignField: "_id",
+                        as: "slots.work_slot"
+                    }
+                },    
+                {
+                    $group: {
+                        _id: "$_id",
+                        date: {
+                            "$first": "$date"
+                        },
+                        slots: {
+                            "$push": "$slots"
+                        },
+                        status: {
+                            "$first": "$status"
+                        },
+                        createdAt: {
+                            "$first": "$createdAt"
+                        },
+                        updatedAt: {
+                            "$first": "$updatedAt"
+                        }
+                    }
                 }
             ])
             res.status(200).json(workSchedule)
@@ -125,9 +159,59 @@ class ScheduleController {
 
     async showWorkSlotForAssign (req, res) {
         try {
-            const {dateString} = req.query
+            const {dateString, slot = 1} = req.query
             const date = parse(dateString, 'yyyy-MM-dd', new Date())    
-            let schedule = await Schedule.findOne({date: date}).populate("slots")
+            const schedule = await Schedule.aggregate([
+                {
+                    $match: {
+                        date: date,
+                        slots: {$exists: true}
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "slots",
+                        localField: "slots",
+                        foreignField: "_id",
+                        as: "slots"
+                    }
+                },
+                {
+                    $unwind: "$slots"
+                },
+                {
+                    $unwind: "$slots.work_slot"
+                },
+                {
+                    $lookup: {
+                        from: "workslots",
+                        localField: "slots.work_slot",
+                        foreignField: "_id",
+                        as: "slots.work_slot"
+                    }
+                },    
+                {
+                    $group: {
+                        _id: "$_id",
+                        date: {
+                            "$first": "$date"
+                        },
+                        slots: {
+                            "$push": "$slots"
+                        },
+                        status: {
+                            "$first": "$status"
+                        },
+                        createdAt: {
+                            "$first": "$createdAt"
+                        },
+                        updatedAt: {
+                            "$first": "$updatedAt"
+                        }
+                    }
+                }
+
+            ])
             res.status(200).json(schedule)
         } catch (err) {
             res.status(500).json(err)
