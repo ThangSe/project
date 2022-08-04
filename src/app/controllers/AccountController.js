@@ -16,7 +16,7 @@ class AccountController {
             const role = req.body.role
             const agency_id  = req.body.agency_id
             const existedAccount = await Account.findOne({ username: username })
-            if (existedAccount) return res.status(404).json("user is existed")
+            if (existedAccount) return res.status(404).json("Người dùng đã tồn tại")
             const newAccount = await new Account({
                 username,
                 password: hashed,
@@ -75,13 +75,13 @@ class AccountController {
     //DELETE /account/:id
     deleteAccount(req, res, next) {
         Account.delete({_id: req.params.id})
-            .then(() => res.json("Delete successfully"))
+            .then(() => res.json("Xóa tài khoản thành công"))
             .catch(next)
     }
     //PATCH /account/:id/restore
     restoreAccount(req, res, next) {
         Account.restore({_id: req.params.id})
-            .then(() => res.json("Restore successfully"))
+            .then(() => res.json("Khôi phục tài khoản thành công"))
             .catch(next)
     }
     //GET /account/:id
@@ -111,15 +111,15 @@ class AccountController {
                 account.password
             )
             if(oldPass.localeCompare(repeatPass)) {
-                return res.status(404).json("Old pass doesn't match")
+                return res.status(404).json("Mật khẩu nhập lại không trùng khớp")
             }
             else if(!validOldPass) {
-                return res.status(404).json("Wrong password")
+                return res.status(404).json("Sai mật khẩu")
             }
             else if (validOldPass && validRepeatPass) {
                 const hashed = await bcrypt.hash(newPass, 10)     
                 await account.updateOne({$set: {"password": hashed}})
-                res.status(200).json("Update successfully")
+                res.status(200).json("Cập nhật thành công")
             }    
         } catch (err) {
             res.status(500).json(err)
@@ -145,7 +145,7 @@ class AccountController {
             const acc_id = accountInfo.id
             const user = User.findOne({acc_id: acc_id})
             await user.updateOne({$set: req.body})
-            res.status(200).json("Update profile successfully")
+            res.status(200).json("Cập nhật trang cá nhân thành công")
         } catch (err) {
             res.status(500).json(err)
         }

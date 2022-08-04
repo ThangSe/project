@@ -80,7 +80,7 @@ class BookingController {
         try {
             const booking = await Booking.findById(req.params.id)
             await booking.updateOne({$set: req.body})
-            res.status(200).json("Update successfully")
+            res.status(200).json("Cập nhật lịch hẹn thành công")
         } catch (err) {
             res.status(500).json(err)
         }
@@ -89,13 +89,13 @@ class BookingController {
     async acceptBooking(req, res) {
         try {
             const booking = await Booking.findById(req.body.id)
-            await booking.updateOne({$set: {status: 'accepted'}})
+            await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
             const order = new Order()
             const saveOrder = await order.save()
             const updateOrder = await Order.findById(saveOrder.id)
             await updateOrder.updateOne({$set: {booking_id: booking.id}})
             await booking.updateOne({$set: {order_id: saveOrder.id}})
-            res.status(200).json("Accepted")
+            res.status(200).json("Tiếp nhận lịch hẹn thành công")
         } catch (err) {
             res.status(500).json(err)
         }
@@ -108,18 +108,18 @@ class BookingController {
             const acc_id = accountInfo.id
             const booking = await Booking.findOne({$and:[
                 {_id: req.body.id},
-                {acc_id: acc_id}    
+                {acc_id: acc_id}
             ]}).populate("order_id")
-            if(booking.status == "pending") {
-                await booking.updateOne({$set: {status: 'cancel'}})
-                return res.status(200).json("Cancel successful")
+            if(booking.status == "Đang xử lí") {
+                await booking.updateOne({$set: {status: 'Hủy'}})
+                return res.status(200).json("Hủy lịch hẹn thành công")
             }
-            else if(booking.status == "accepted" && booking.order_id.status == "waiting") {
-                await booking.updateOne({$set: {status: 'cancel'}})
-                return res.status(200).json("Cancel successful")
+            else if(booking.status == "Đã tiếp nhận" && booking.order_id.status == "Đang chờ") {
+                await booking.updateOne({$set: {status: 'Hủy'}})
+                return res.status(200).json("Hủy lịch hẹn thành công")
             }
             else {
-                return res.status(200).json("Cannot cancel")
+                return res.status(200).json("Lịch hẹn của bạn đã được tiếp nhận không thể hủy")
             }
         } catch (err) {
             res.status(500).json(err)

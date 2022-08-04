@@ -133,6 +133,20 @@ class ScheduleController {
             res.status(500).json(err)
         }
     }
+    //GET /oneweekschedule (customer)
+    async getOneWeekSchedule(req, res) {
+        try {
+            const scheduleOneWeekFromNow = await Schedule.find({
+                date: {
+                    $gte: new Date(),
+                    $lte: new Date(new Date().valueOf() + 604800000)
+                }
+            }).sort({date: 1}).populate("slots")
+            res.status(200).json(scheduleOneWeekFromNow)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 
 }
 
