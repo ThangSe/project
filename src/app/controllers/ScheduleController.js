@@ -114,10 +114,7 @@ class ScheduleController {
                 },
                 {
                     $unwind: "$slots"
-                },
-                {
-                    $unwind: "$slots.work_slot"
-                },
+                },               
                 {
                     $lookup: {
                         from: "workslots",
@@ -209,9 +206,11 @@ class ScheduleController {
                             "$first": "$updatedAt"
                         }
                     }
-                }
+                },
+                
 
             ])
+            schedule.findOne()
             res.status(200).json(schedule)
         } catch (err) {
             res.status(500).json(err)
