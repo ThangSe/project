@@ -6,4 +6,7 @@ router.post('/assignslot', middlewareController.verifyTokenStaff, scheduleContro
 router.get('/allschedule', scheduleController.showWorkSchedule)
 router.get('/show-slot', scheduleController.showWorkSlotForAssign)
 router.get('/oneweekschedule', scheduleController.getOneWeekSchedule)
+router.patch('/assign-slot-to-order', middlewareController.verifyTokenManager, scheduleController.assignWorkSlotToOrder)
+router.get('/show-workslot-for-assign', middlewareController.verifyTokenManager, scheduleController.showWorkSlotForAssign)
+router.get('/show-workslot', middlewareController.verifyTokenStaff, scheduleController.showWorkSlotStaff)
 module.exports = router

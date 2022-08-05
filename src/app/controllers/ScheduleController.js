@@ -4,6 +4,7 @@ const Schedule = require('../models/Schedule')
 const Slot = require('../models/Slot')
 const WorkSlot = require('../models/WorkSlot')
 const Account = require('../models/Account')
+const Order = require('../models/Order')
 const Buffer = require('buffer/').Buffer
 
 class ScheduleController {
@@ -151,7 +152,15 @@ class ScheduleController {
     }
     
     async assignWorkSlotToOrder (req, res) {
-
+        try {
+            const workSlotId = req.body.workSlotId
+            const orderId = req.body.orderId
+            await Order.findByIdAndUpdate({_id: orderId}, {$push: {workslot_id: workSlotId}})
+            await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
+            res.status(200).json("Cử nhân viên thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }     
     }
 
     async showWorkSlotForAssign (req, res) {
@@ -175,9 +184,6 @@ class ScheduleController {
                 },
                 {
                     $unwind: "$slots"
-                },
-                {
-                    $unwind: "$slots.work_slot"
                 },
                 {
                     $lookup: {
@@ -225,6 +231,18 @@ class ScheduleController {
                 }
             }).sort({date: 1}).populate("slots")
             res.status(200).json(scheduleOneWeekFromNow)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async showWorkSlotStaff(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const workSlots = await WorkSlot.find({staff_id:acc_id}).populate('slot_id', {slot: 1, start: 1, end: 1, schedule_id: 1})
+            res.status(200).json(workSlots)
         } catch (err) {
             res.status(500).json(err)
         }
