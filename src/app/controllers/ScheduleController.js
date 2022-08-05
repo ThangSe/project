@@ -210,7 +210,6 @@ class ScheduleController {
                 
 
             ])
-            schedule.findOne()
             res.status(200).json(schedule)
         } catch (err) {
             res.status(500).json(err)

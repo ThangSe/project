@@ -93,9 +93,9 @@ class BookingController {
             const order = new Order()
             const saveOrder = await order.save()
             const updateOrder = await Order.findById(saveOrder.id)
-            await updateOrder.updateOne({$set: {booking_id: booking.id}})
+            await updateOrder.updateOne({$set: {booking_id: booking.id}}, {new: true})
             await booking.updateOne({$set: {order_id: saveOrder.id}})
-            res.status(200).json("Tiếp nhận lịch hẹn thành công")
+            res.status(200).json(updateOrder)
         } catch (err) {
             res.status(500).json(err)
         }

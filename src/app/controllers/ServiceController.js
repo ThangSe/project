@@ -1,5 +1,6 @@
 const Accessory = require('../models/Accessory')
 const Service = require('../models/Service')
+const Supplier = require('../models/Supplier')
 
 class ServiceController {
     //GET /service/all-service
@@ -29,8 +30,19 @@ class ServiceController {
         }
         
     }
-
-
+    async getService(req,res) {
+        try {
+            
+        } catch (err) {
+            
+        }
+    }
+    async updateService (req, res) {
+        const filter = {_id: req.params.id}
+        const update ={}
+    }
+    
+ 
 }
 
 module.exports = new ServiceController()
