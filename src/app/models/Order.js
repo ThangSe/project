@@ -6,7 +6,7 @@ const Order = new Schema({
     totalPrice: {type: Number},
     status: {type: String, default: 'waiting'},
     orderDetails_id:[{type: mongoose.Schema.Types.ObjectId, ref: "orderdetails"}],
-    booking_id: {type: mongoose.Schema.Types.ObjectId, unique:true, ref: "booking"},
+    booking_id: {type: mongoose.Schema.Types.ObjectId, ref: "booking"},
     work_slot:[
         {type: mongoose.Schema.Types.ObjectId, ref:"workslot"}
     ]
