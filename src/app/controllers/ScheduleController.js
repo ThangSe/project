@@ -155,7 +155,7 @@ class ScheduleController {
         try {
             const workSlotId = req.body.workSlotId
             const orderId = req.body.orderId
-            await Order.findByIdAndUpdate({_id: orderId}, {$push: {workslot_id: workSlotId}})
+            await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId}})
             await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
             res.status(200).json("Cử nhân viên thành công")
         } catch (err) {
@@ -165,7 +165,7 @@ class ScheduleController {
 
     async showWorkSlotForAssign (req, res) {
         try {
-            const {dateString, slot = 1} = req.query
+            const {dateString} = req.query
             const date = parse(dateString, 'yyyy-MM-dd', new Date())    
             const schedule = await Schedule.aggregate([
                 {
@@ -241,8 +241,49 @@ class ScheduleController {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
-            const workSlots = await WorkSlot.find({staff_id:acc_id}).populate('slot_id', {slot: 1, start: 1, end: 1, schedule_id: 1})
+            const workSlots = await WorkSlot.find({staff_id:acc_id}).populate([{
+                path: 'slot_id',
+                model: 'slot',
+                select: 'slot start end status schedule_id',
+                populate: {
+                    path: 'schedule_id',
+                    model: 'schedule',
+                    select: 'date status '
+                }
+            }
+        ])
             res.status(200).json(workSlots)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async showScheduleWithoutOrder(req, res) {
+        try {
+            const schedule = await Schedule.find().populate([{
+                path: 'slots',
+                model: 'slot',
+                select: 'slot start end status max_per work_slot',
+                populate: {
+                    path: 'work_slot',
+                    model: 'workslot',
+                    select: 'staff_id order_id',
+                    match: {
+                        order_id: {$exists: false}
+                    },
+                    populate: {
+                        path: 'staff_id',
+                        model: 'account',
+                        select: 'user_id',
+                        populate: {
+                            path: 'user_id',
+                            model: 'user',
+                            select: 'name'
+                        }
+                    }
+                }
+            }])
+            res.status(200).json(schedule)
         } catch (err) {
             res.status(500).json(err)
         }

@@ -4,6 +4,7 @@ const middlewareController = require("../app/controllers/MiddlewareController")
 
 router.post('/assignslot', middlewareController.verifyTokenStaff, scheduleController.assignWorkSlot)
 router.get('/allschedule', scheduleController.showWorkSchedule)
+router.get('/schedule-no-order', scheduleController.showScheduleWithoutOrder)
 router.get('/show-slot', scheduleController.showWorkSlotForAssign)
 router.get('/oneweekschedule', scheduleController.getOneWeekSchedule)
 router.patch('/assign-slot-to-order', middlewareController.verifyTokenManager, scheduleController.assignWorkSlotToOrder)

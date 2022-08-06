@@ -57,7 +57,7 @@ class BookingController {
             .catch(next)
     }
 
-    async create(req, res) {
+    async createBookingCustomer(req, res) {
         try {
              const token = req.headers.token
              const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
@@ -71,6 +71,27 @@ class BookingController {
                 await account.updateOne({$push: {booking: saveBooking._id}}) 
              }
              res.status(200).json(saveBooking)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+        
+    }
+
+    async createBookingManager(req, res) {
+        try {
+             const cus_id = req.query.cusId
+             const booking = new Booking(req.body)
+             const saveBooking = await booking.save()
+             const updateBooking = await Booking.findById(saveBooking.id)
+             await updateBooking.updateOne({$set: {acc_id: cus_id, status: 'Đã tiếp nhận'}})
+             const account =  Account.findById(cus_id)
+             await account.updateOne({$push: {booking: saveBooking._id}})
+             const order = new Order()
+             const saveOrder = await order.save()
+             const updateOrder = await Order.findById(saveOrder.id)
+             await updateOrder.updateOne({$set: {booking_id: saveBooking.id}})
+             await booking.updateOne({$set: {order_id: saveOrder.id}})
+             res.status(200).json('Tạo mới đơn hàng thành công')
         } catch (err) {
             res.status(500).json(err)
         }

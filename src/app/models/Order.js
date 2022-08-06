@@ -7,9 +7,7 @@ const Order = new Schema({
     status: {type: String, default: 'waiting'},
     orderDetails_id:[{type: mongoose.Schema.Types.ObjectId, ref: "orderdetails"}],
     booking_id: {type: mongoose.Schema.Types.ObjectId, ref: "booking"},
-    work_slot:[
-        {type: mongoose.Schema.Types.ObjectId, ref:"workslot"}
-    ]
+    work_slot: {type: mongoose.Schema.Types.ObjectId, ref:"workslot"}
 }, {
     timestamps: true,
 })
