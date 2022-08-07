@@ -258,6 +258,34 @@ class ScheduleController {
         }
     }
 
+    async showScheduleForAssign(req,res) {
+        try {
+            const schedule = await Schedule.find().populate([{
+                path: 'slots',
+                model: 'slot',
+                select: 'slot start end status max_per work_slot',
+                populate: {
+                    path: 'work_slot',
+                    model: 'workslot',
+                    select: 'staff_id order_id',
+                    populate: {
+                        path: 'staff_id',
+                        model: 'account',
+                        select: 'user_id',
+                        populate: {
+                            path: 'user_id',
+                            model: 'user',
+                            select: 'name email address phonenum birth'
+                        }
+                    }
+                }
+            }])
+            res.status(200).json(schedule)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async showScheduleWithoutOrder(req, res) {
         try {
             const schedule = await Schedule.find().populate([{

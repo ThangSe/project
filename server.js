@@ -6,6 +6,7 @@ const helmet = require('helmet')
 const morgan =require('morgan')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
+const methodOverride = require('method-override')
 
 const route = require('./src/routes')
 const db =require('./src/config/db')
@@ -15,6 +16,7 @@ const app = express()
 db.connect()
 
 //app.use(helmet())
+app.use(methodOverride('_method'))
 app.use(bodyParser.json({limit:"50mb"}))
 const whitelist = ['http://localhost:3000', 'https://computer-services.netlify.app/', 'https://computer-services-api.herokuapp.com/', 'http://localhost:5000']
 const corsOptions = {

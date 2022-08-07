@@ -5,7 +5,7 @@ const mongoose = require("mongoose")
 const Buffer = require('buffer/').Buffer
 class OrderController {
     // GET order/test1
-    async showAllServiceToChoose(req, res) {
+    async showAllServiceToChoose(req, res) {    
         try {
             const serviceNoAcc = await Service.find({hasAccessory: false})
             const serviceHasAcc = await Service.aggregate([
@@ -61,11 +61,6 @@ class OrderController {
                 res.json(orders)
             })
             .catch(next)
-    //    Order.find({})
-    //     .then(orders => {
-    //         res.json(orders)
-    //     })
-    //     .catch(next)
     }
 
     showLastestOrder (req, res, next) {

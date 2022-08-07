@@ -1,10 +1,15 @@
 const Account = require("../models/Account")
 const Agency = require("../models/Agency")
 const User = require("../models/User")
-const Booking = require("../models/Booking")
 const bcrypt = require("bcrypt")
-const Buffer = require('buffer/').Buffer
+const Buffer = require('buffer').Buffer
+const mongoose = require('mongoose')
 const multer = require('multer')
+const {GridFsStorage} = require('multer-gridfs-storage')
+const Grid = require('gridfs-stream')
+const crypto = require('crypto')
+const path = require('path')
+
 class AccountController {
     //Register manager accounts
     //POST /account/register
@@ -153,28 +158,41 @@ class AccountController {
     //PATCH /account/editimgprofile (customer)
     async updateImgProfileAccount(req, res) {
         try {
-            const storage = multer.diskStorage({
-                destination: "uploads",
-                filename: (req, file, cb) => {
-                    cb(null, file.originalname)
-                }
+            const conn = mongoose.createConnection(process.env.DB_CONNECTION)
+            let gfs
+            conn.once('open', () => {
+            gfs = Grid(conn.db, mongoose.mongo)
+            gfs.collection('uploads')
             })
-            const upload = multer({
-                storage: storage
-            }).single('img')
-            const token = req.headers.token
-            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-            const acc_id = accountInfo.id
-            const user = await User.findOne({acc_id: acc_id})
-            upload(req, res, (err)=>{
+
+            const storage = new GridFsStorage({
+            url: process.env.DB_CONNECTION,
+            file: (req, file) => {
+                return new Promise((resolve, reject) => {
+                crypto.randomBytes(16, (err, buf) => {
+                    if(err) {
+                    return reject(err)
+                    }
+                    const filename = buf.toString('hex') + path.extname(file.originalname)
+                    const fileInfo = {
+                    filename: filename,
+                    bucketName: 'uploads'
+                    }
+                    resolve(fileInfo)
+                })
+                })
+            }
+            })
+            const upload = multer({storage}).single('img')
+            upload(req, res, (err) => {
                 if(err) {
-                    return res.status(500).json(err)
+                    res.json(err)
                 }
                 else {
-                    user.updateOne({$set: {img: {data: req.file.filename, contentType: "image/png"}}})
-                    return res.status(200).json("Upload success")
+                    console.log("q")
+                    res.json({file: req.file})
                 }
-            })       
+            })    
         } catch (err) {
             res.status(500).json(err)
         }
