@@ -69,7 +69,7 @@ class OrderController {
                     select: 'name type price'
                 }])
                 await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
                 const totalPrice = (amountAcc*accessory.price + amountSer*accessory.service_id.price)*(100-discount)/100
                 const lastestDetail = await OrderDetail.findByIdAndUpdate(
                     {_id: saveOrderDetail.id}, 
@@ -102,7 +102,7 @@ class OrderController {
                 const saveOrderDetail = await orderDetail.save()
                 const service = await Service.findById(req.body.service_id)
                 await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
                 const totalPrice = (amountSer*service.price)*(100-discount)/100
                 const lastestDetail = await OrderDetail.findByIdAndUpdate(
                     {_id: saveOrderDetail.id},
@@ -132,7 +132,10 @@ class OrderController {
             for (var item of order.orderDetails_id){
                 price+= item.price_after
             }
-            const updateOrder = await Order.findOneAndUpdate({_id:order.id}, {totalPrice: price}, {new: true})
+            const updateOrder = await Order.findOneAndUpdate({_id:order.id}, {totalPrice: price}, {new: true}).populate([{
+                path: 'orderDetails_id',
+                model: 'orderdetail'
+            }])
             res.status(200).json(updateOrder)
 
         } catch (err) {
@@ -169,7 +172,7 @@ class OrderController {
         try {
             const order = await Order.findById(req.params.id)
             await order.updateOne({$set: req.body})
-            res.status(200).json("Update successfully")
+            res.status(200).json("Cập nhật thành công")
         } catch (err) {
             res.status(500).json(err)
         }
@@ -177,8 +180,13 @@ class OrderController {
     async acceptOrder(req, res) {
         try {
             const order = await Order.findById(req.body.id)
-            await order.updateOne({$set: {status: 'pending'}})
-            res.status(200).json("Accepted")
+            if(order.status == 'Chờ xác nhận'){
+                await order.updateOne({$set: {status: 'Đã xác nhận'}})
+                res.status(200).json("Đơn hàng đã được xác nhận")
+            }
+            else {
+                res.status(404).json("Đơn hàng không ở trạng thái chờ")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
@@ -186,8 +194,8 @@ class OrderController {
     async cancelOrder(req, res) {
         try {
             const order = await Order.findById(req.body.id)
-            await order.updateOne({$set: {status: 'cancel'}})
-            res.status(200).json("Cancel")
+            await order.updateOne({$set: {status: 'Hủy'}})
+            res.status(200).json("Đơn hàng đã bị hủy")
         } catch (err) {
             res.status(500).json(err)
         }
@@ -195,8 +203,8 @@ class OrderController {
     async completeOrder(req, res) {
         try {
             const order = await Order.findById(req.body.id)
-            await order.updateOne({$set: {status: 'completed'}})
-            res.status(200).json("Completed")
+            await order.updateOne({$set: {status: 'Hoàn thành'}})
+            res.status(200).json("Đơn hàng đã hoàn thành")
         } catch (err) {
             res.status(500).json(err)
         }

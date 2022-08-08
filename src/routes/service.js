@@ -2,6 +2,6 @@ const serviceController = require("../app/controllers/ServiceController")
 const middlewareController = require("../app/controllers/MiddlewareController")
 const router = require("express").Router()
 
-router.get("/all-service", serviceController.showAllService)
+router.get("/all-service", middlewareController.verifyTokenStaff, serviceController.showAllService)
 router.post("/create-service", middlewareController.verifyTokenManager, serviceController.createNewService)
 module.exports = router
