@@ -10,5 +10,5 @@ router.patch('/accpet-order', orderController.acceptOrder)
 router.patch('/complete-order', orderController.completeOrder)
 router.patch('/cancel-order', orderController.cancelOrder)
 router.post('/add-detail-order/:id', orderController.addDetailOrder)
-router.get('/testb/:id', orderController.testTotalPrice)
+router.get('/get-order-total-price/:id', orderController.testTotalPrice)
 module.exports = router

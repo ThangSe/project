@@ -120,15 +120,20 @@ class OrderController {
         }
     }
 
-    async testTotalPrice(req, res) {
+    async getTotalPrice(req, res) {
         try {
+            let price = 0
             const order = await Order.findById(req.params.id, 'orderDetails_id').populate([
                 {
                     path: 'orderDetails_id',
                     model: 'orderdetail'
                 }
             ])
-            res.status(200).json(order)
+            for (var item of order.orderDetails_id){
+                price+= item.price_after
+            }
+            const updateOrder = await Order.findOneAndUpdate({_id:order.id}, {totalPrice: price}, {new: true})
+            res.status(200).json(updateOrder)
 
         } catch (err) {
             res.status(500).json(err)
