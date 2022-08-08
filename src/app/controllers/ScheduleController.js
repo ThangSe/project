@@ -250,6 +250,16 @@ class ScheduleController {
                     model: 'schedule',
                     select: 'date status '
                 }
+            },
+            {
+                path: 'order_id',
+                model: 'order',
+                select: 'booking_id',
+                populate: {
+                    path:'booking_id',
+                    model:'booking',
+                    select:'cus_name services description type cus_address phonenum'
+                }
             }
         ])
             res.status(200).json(workSlots)

@@ -10,6 +10,9 @@ const Service = new Schema({
     type: {type: String, required: true},
     price: {type: Number, required: true},
     hasAccessory: {type: Boolean, required:true, default: false},
+    orderdetail_id: [
+        {type: mongoose.Schema.Types.ObjectId, ref:"orderdetail"}
+    ],
     accessories_id: [
         {type: mongoose.Schema.Types.ObjectId, ref:"accessory"}
     ]

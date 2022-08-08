@@ -1,6 +1,8 @@
 const Order = require("../models/Order")
 // const OrderDetail = require("../models/OrderDetail")
 const Service = require("../models/Service")
+const OrderDetail = require("../models/OrderDetail")
+const Accessory = require('../models/Accessory')
 const mongoose = require("mongoose")
 const Buffer = require('buffer/').Buffer
 class OrderController {
@@ -45,14 +47,94 @@ class OrderController {
             res.status(500).json(err)
         }
     }
-    //POST /order/addDetailOrder
+    //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
-            //    const insertDetail = OrderDetail.insertMany(req.body)
+            const order = await Order.findById(req.params.id)            
+            const hasAccessory = req.body.hasAccessory
+            const amountSer = req.body.amount_ser
+            const amountAcc = req.body.amount_acc
+            const discount = req.body.discount
+            if(hasAccessory) {
+                const orderDetail = new OrderDetail({
+                    amount_ser: amountSer,
+                    amount_acc: amountAcc,
+                    discount,
+                    accessory_id: req.body.accessory_id
+                })
+                const saveOrderDetail = await orderDetail.save()
+                const accessory = await Accessory.findById(req.body.accessory_id).populate([{
+                    path: 'service_id',
+                    model: 'service',
+                    select: 'name type price'
+                }])
+                await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                const totalPrice = (amountAcc*accessory.price + amountSer*accessory.service_id.price)*(100-discount)/100
+                const lastestDetail = await OrderDetail.findByIdAndUpdate(
+                    {_id: saveOrderDetail.id}, 
+                    {price_after: totalPrice, order_id: order.id, accessory_id: accessory.id }, 
+                    {new: true}
+                ).populate([{
+                    path: 'accessory_id',
+                    model: 'accessory',
+                    select: 'name description insurance supplier_id service_id price',
+                    populate: [{
+                        path: 'supplier_id',
+                        model: 'supplier',
+                        select: 'name'
+                    },
+                    {
+                        path: 'service_id',
+                        model: 'service',
+                        select: 'name description type price'
+                    }
+                ]
+                }])
+                res.status(200).json(lastestDetail)
+            }
+            else {
+                const orderDetail = new OrderDetail({
+                    amount_ser: amountSer,
+                    discount,
+                    service_id: req.body.service_id
+                })
+                const saveOrderDetail = await orderDetail.save()
+                const service = await Service.findById(req.body.service_id)
+                await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                const totalPrice = (amountSer*service.price)*(100-discount)/100
+                const lastestDetail = await OrderDetail.findByIdAndUpdate(
+                    {_id: saveOrderDetail.id},
+                    {price_after: totalPrice, order_id: order.id, service_id: service.id}, 
+                    {new: true}
+                ).populate([{
+                    path: 'service_id',
+                    model: 'service',
+                    select: 'name description type price'
+                }])
+                res.status(200).json(lastestDetail)
+            }
         } catch (err) {
             res.status(500).json(err)
         }
     }
+
+    async testTotalPrice(req, res) {
+        try {
+            const order = await Order.findById(req.params.id, 'orderDetails_id').populate([
+                {
+                    path: 'orderDetails_id',
+                    model: 'orderdetail'
+                }
+            ])
+            res.status(200).json(order)
+
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     showAllOrder(req, res, next) {
         Order.aggregate([{$project: {
             status : 1

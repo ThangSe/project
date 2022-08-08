@@ -9,7 +9,10 @@ const Accessory = new Schema({
     description: {type: String, required: true},
     insurance: {type: String, required: true},
     service_id: {type: mongoose.Schema.Types.ObjectId, ref:"service"},
-    supplier_id: {type: mongoose.Schema.Types.ObjectId, ref:"supplier"}
+    supplier_id: {type: mongoose.Schema.Types.ObjectId, ref:"supplier"},
+    orderdetail_id: [
+        {type: mongoose.Schema.Types.ObjectId, ref:"orderdetail"}
+    ]
 }, {
     timestamps: true,
 })
