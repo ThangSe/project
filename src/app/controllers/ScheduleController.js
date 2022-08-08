@@ -33,7 +33,7 @@ class ScheduleController {
                             {slot_id: existedSlot.id}
                         ]})
                         if(existedStaff) {
-                            return res.status(500).json('Already assign this slot')
+                            return res.status(500).json('Bạn đã đăng kí slot làm việc này rồi')
                         }
                         else {
                             const workSlot = new WorkSlot({
@@ -43,11 +43,11 @@ class ScheduleController {
                             const saveWorkSlot = await workSlot.save()
                             await existedSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
                             await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                            return res.status(200).json('Assign successful')
+                            return res.status(200).json('Đăng kí slot làm việc thành công')
                         }                        
                     }
                     else {
-                        return res.status(500).json('slot full')
+                        return res.status(500).json('slot làm việc đã đủ người')
                     }                    
                 } else {
                     const newSlot = new Slot({
@@ -65,7 +65,7 @@ class ScheduleController {
                     await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
                     await existedSchedule.updateOne({$push: {slots: saveSlot.id}})
                     await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                    return res.status(200).json('Assign successful')
+                    return res.status(200).json('Đăng kí slot làm việc thành công')
 
                 }
             }
@@ -89,7 +89,7 @@ class ScheduleController {
                 await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
                 await saveSchedule.updateOne({$push: {slots: saveSlot.id}})
                 await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                return res.status(200).json('Assign successful')
+                return res.status(200).json('Đăng kí slot làm việc thành công')
             }
 
         } catch (err) {
@@ -155,7 +155,7 @@ class ScheduleController {
         try {
             const workSlotId = req.body.workSlotId
             const orderId = req.body.orderId
-            await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId}})
+            await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
             await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
             res.status(200).json("Cử nhân viên thành công")
         } catch (err) {

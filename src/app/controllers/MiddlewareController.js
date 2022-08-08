@@ -21,7 +21,7 @@ const middlewareController = {
 
     verifyTokenAdmin: (req, res, next) => {
         middlewareController.verifyToken(req,res, () => {
-            if(req.account.id == req.params.id || req.account.role == "admin") {
+            if(req.account.role == "admin") {
                 next()
             }
             else {
@@ -31,7 +31,7 @@ const middlewareController = {
     },
     verifyTokenManager: (req, res, next) => {
         middlewareController.verifyToken(req,res, () => {
-            if(req.account.id == req.params.id || req.account.role == "manager") {
+            if(req.account.role == "manager" || req.account.role == "admin") {
                 next()
             }
             else {
@@ -41,7 +41,7 @@ const middlewareController = {
     },
     verifyTokenStaff: (req, res, next) => {
         middlewareController.verifyToken(req,res, () => {
-            if(req.account.id == req.params.id || req.account.role == "staff") {
+            if(req.account.role == "staff") {
                 next()
             }
             else {
