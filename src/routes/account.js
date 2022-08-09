@@ -9,10 +9,10 @@ router.get("/view-booking-history", middlewareController.verifyToken, accountCon
 router.get("/:username", middlewareController.verifyTokenManager, accountController.getAccountByUsername)
 router.get("/all/lastest-account", middlewareController.verifyTokenManager, accountController.showLastestAccount)
 router.get("/byId/:id", middlewareController.verifyTokenManager, accountController.getAccountById)
-router.delete("/:id", middlewareController.verifyTokenAdmin, accountController.deleteAccount)
 router.patch('/change-password', middlewareController.verifyToken, accountController.updateAccountById)
-router.patch("/:id/restore", middlewareController.verifyTokenManager,  accountController.restoreAccount)
 router.patch("/editprofile", middlewareController.verifyToken, accountController.updateProfileAccount)
 router.post("/register-staff", accountController.registerAccountStaff)
 router.post("/editimgprofile",/* middlewareController.verifyToken,*/ accountController.updateImgProfileAccount)
+router.patch("/:id/restore", middlewareController.verifyTokenManager,  accountController.restoreAccount)
+router.delete("/:id", middlewareController.verifyTokenAdmin, accountController.deleteAccount)
 module.exports = router

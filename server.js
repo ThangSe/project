@@ -7,8 +7,6 @@ const morgan =require('morgan')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
-var startOfWeek = require('date-fns/startOfWeek')
-var endOfWeek = require('date-fns/endOfWeek')
 
 const route = require('./src/routes')
 const db =require('./src/config/db')
@@ -16,9 +14,6 @@ const db =require('./src/config/db')
 const app = express()
 
 db.connect()
-
-const start = startOfWeek(new Date(), {weekStartsOn: 1})
-console.log(start)
 
 //app.use(helmet())
 app.use(methodOverride('_method'))

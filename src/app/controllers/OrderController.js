@@ -158,11 +158,11 @@ class OrderController {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
-            const orders = await WorkSlot.find({staff_id:acc_id}, {_id: 0, oder_id: 1}).populate([{
+            const orders = await WorkSlot.find({staff_id: acc_id, order_id: {$exists: true}}, {_id: 0, oder_id: 1}).populate([{
                 path: 'order_id',
-                model: 'order'
+                model: 'order',
             }])
-            res.stats(200).json(orders)
+            res.status(200).json(orders)
         } catch (err) {
             res.status(500).json(err)
         }
