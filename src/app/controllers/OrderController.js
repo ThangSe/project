@@ -213,6 +213,11 @@ class OrderController {
                             path: 'service_id',
                             model: 'service',
                             select: 'name price hasAccessory'
+                        },
+                        {
+                            path: 'accessories.accessory_id',
+                            model: 'accessory',
+                            select: 'name price'
                         }
                     ]
                 },
