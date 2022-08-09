@@ -6,7 +6,7 @@ const Booking = new Schema({
     cus_name: {type: String, required: true},
     services: {type: Array, required: true},
     description: {type: String},
-    type: {type: String, required: true},
+    type: {type: String, required: true, default: 'Sửa tại nhà'},
     cus_address: {
         city: {type: String, required: true},
         district: {type: String, required: true},
