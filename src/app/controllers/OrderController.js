@@ -183,13 +183,13 @@ class OrderController {
              const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
              const acc_id = accountInfo.id
              const booking = await Booking.findOne({acc_id: acc_id})
-             const order = await Order.findOne({$and: [{_id: orderId, booking_id: booking.id}]}).populate([
+             const order = await Order.findOne({_id: orderId, booking_id: booking.id}).populate([
                 {
                     path: 'orderDetails_id',
                     model: 'orderdetail'
                 }
              ])
-             re.status(200).json(order)
+             res.status(200).json(order)
         } catch (err) {
             res.status(500).json(err)
         }

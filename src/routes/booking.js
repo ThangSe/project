@@ -10,7 +10,7 @@ router.get('/search/:id', middlewareController.verifyTokenStaff, bookingControll
 router.post('/create', middlewareController.verifyToken, bookingController.createBookingCustomer)
 router.post('/create-booking-manager', middlewareController.verifyTokenManager, bookingController.createBookingManager)
 router.put('/:id', middlewareController.verifyTokenManager, bookingController.updateBookingById)
-router.put('update/:id', middlewareController.verifyToken, bookingController.updateBookingByIdForCus)
+router.put('/update/:id', middlewareController.verifyToken, bookingController.updateBookingByIdForCus)
 router.patch('/accpet-booking', middlewareController.verifyTokenManager, bookingController.acceptBooking)
 router.patch('/cancel-booking', middlewareController.verifyToken, bookingController.cancelBooking)
 module.exports = router
