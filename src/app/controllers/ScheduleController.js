@@ -1,5 +1,6 @@
 const parse = require('date-fns/parse')
 const isDate = require('date-fns/isDate')
+const format = require('date-fns/format')
 const Schedule = require('../models/Schedule')
 const Slot = require('../models/Slot')
 const WorkSlot = require('../models/WorkSlot')
@@ -276,8 +277,9 @@ class ScheduleController {
 
     async showOneWeekWorkStaff(req, res) {
         try {
-            const start = startOfWeek(new Date(), {weekStartsOn: 1})
-            const end = endOfWeek(new Date(), {weekStartsOn: 1})
+            const start = format(startOfWeek(new Date(), {weekStartsOn: 1}),'yyyy-MM-dd')
+            const end = format(endOfWeek(new Date(), {weekStartsOn: 1}), 'yyyy-MM-dd')
+            console.log({start, end})
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
@@ -297,7 +299,7 @@ class ScheduleController {
                             $gte: start,
                             $lte: end
                         }
-                    }    
+                    }
                 }
             },
             {
