@@ -6,6 +6,8 @@ const WorkSlot = require('../models/WorkSlot')
 const Account = require('../models/Account')
 const Order = require('../models/Order')
 const Buffer = require('buffer/').Buffer
+var startOfWeek = require('date-fns/startOfWeek')
+var endOfWeek = require('date-fns/endOfWeek')
 
 class ScheduleController {
     // POST /schedule/assignslot
@@ -247,8 +249,51 @@ class ScheduleController {
                 select: 'slot start end status schedule_id',
                 populate: {
                     path: 'schedule_id',
+                    model: 'schedule',                    
+                    select: 'date status'
+                }
+            },
+            {
+                path: 'order_id',
+                model: 'order',
+                select: 'booking_id',
+                populate: {
+                    path:'booking_id',
+                    model:'booking',
+                    select:'cus_name services description type cus_address phonenum'
+                }
+            }
+        ])
+            res.status(200).json(workSlots)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async showOneWeekWorkStaff(req, res) {
+        try {
+            const start = startOfWeek(new Date(), {weekStartsOn: 1})
+            const end = endOfWeek(new Date(), {weekStartsOn: 1})
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const workSlots = await WorkSlot.find({staff_id:acc_id}).populate([{
+                path: 'slot_id',
+                model: 'slot',
+                select: 'slot start end status schedule_id',
+                match: {
+                    schedule_id : {$exists: true}
+                },
+                populate: {
+                    path: 'schedule_id',                 
                     model: 'schedule',
-                    select: 'date status '
+                    select: 'date status ',
+                    match: {
+                        date: {
+                            $gte: start,
+                            $lte: end
+                        }
+                    }    
                 }
             },
             {

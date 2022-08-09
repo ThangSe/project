@@ -1,5 +1,5 @@
 const Order = require("../models/Order")
-// const OrderDetail = require("../models/OrderDetail")
+const WorkSlot = require("../models/WorkSlot")
 const Service = require("../models/Service")
 const OrderDetail = require("../models/OrderDetail")
 const Accessory = require('../models/Accessory')
@@ -159,6 +159,20 @@ class OrderController {
                 res.json(orders)
             })
             .catch(next)
+    }
+
+    async getOrderByStaff (req, res) {
+        try {
+            const orderId = req.params.id
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const workSlot = await WorkSlot.findOne({staff_id: acc_id, order_id: orderId})
+            const order = await Order.findOne({work_slot: workSlot.id})
+            res.status(200).json(order)
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 
     async getOrderByIdForCus (req, res) {
