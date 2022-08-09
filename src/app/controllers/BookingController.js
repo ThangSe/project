@@ -235,6 +235,15 @@ class BookingController {
         }
     }
 
+    async test(req, res) {
+        try {
+            const customer = await Account.findById(req.query.id, {booking: 1})
+            res.status(200).json(customer)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
 }
 
 module.exports = new BookingController()
