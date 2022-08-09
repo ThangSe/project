@@ -224,7 +224,19 @@ class OrderController {
              const order = await Order.findOne({_id: orderId}).populate([
                 {
                     path: 'orderDetails_id',
-                    model: 'orderdetail'
+                    model: 'orderdetail',
+                    populate: [
+                        {
+                            path: 'service_id',
+                            model: 'service',
+                            select: 'name price'
+                        },
+                        {
+                            path: 'accessory_id',
+                            model: 'accessory',
+                            select: 'name price'
+                        }
+                    ]
                 },
                 {
                     path: 'booking_id',
@@ -288,7 +300,7 @@ class OrderController {
         try {
             const order = await Order.findById(req.body.id)
             if(order.status == 'Chờ xác nhận'){
-                await order.updateOne({$set: {status: 'Đã xác nhận'}})
+                await order.updateOne({$set: {status: 'Quản lí xác nhận'}})
                 res.status(200).json("Đơn hàng đã được xác nhận")
             }
             else {

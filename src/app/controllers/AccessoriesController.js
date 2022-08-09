@@ -39,11 +39,13 @@ class AccessoriesController {
         }
     }
 
-    async getService(req,res) {
+    async getAccessory(req,res) {
         try {
-            
+            const accessoryId = req.body.accessoryId
+            const accessory = await Accessory.findById({accessoryId})
+            res.status(200).json(accessory)
         } catch (err) {
-            
+            res.status(500).json(err)
         }
     }
 }
