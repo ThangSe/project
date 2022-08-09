@@ -120,7 +120,10 @@ class BookingController {
              const token = req.headers.token
              const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
              const acc_id = accountInfo.id
-             const booking = await Booking.findOne({_id: bookingId, acc_id: acc_id})
+             const booking = await Booking.findOne({_id: bookingId, acc_id: acc_id}).populate([{
+                path: 'order_id',
+                model: 'order'
+             }])
              res.stauts(200).json(booking)
         } catch (err) {
             res.status(500).json(err)
