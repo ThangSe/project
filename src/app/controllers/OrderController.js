@@ -213,11 +213,6 @@ class OrderController {
                             path: 'service_id',
                             model: 'service',
                             select: 'name price hasAccessory'
-                        },
-                        {
-                            path: 'accessory_id',
-                            model: 'accessory',
-                            select: 'name price'
                         }
                     ]
                 },
