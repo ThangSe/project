@@ -270,6 +270,10 @@ class ScheduleController {
         }
     }
 
+    test(req,res) {
+
+    }
+
     async showOneWeekWorkStaff(req, res) {
         try {
             const start = startOfWeek(new Date(), {weekStartsOn: 1})

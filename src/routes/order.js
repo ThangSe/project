@@ -12,4 +12,5 @@ router.patch('/complete-order', middlewareController.verifyTokenStaff, orderCont
 router.patch('/cancel-order', middlewareController.verifyTokenStaff, orderController.cancelOrder)
 router.post('/add-detail-order/:id', middlewareController.verifyTokenStaff, orderController.addDetailOrder)
 router.get('/get-order-total-price/:id', middlewareController.verifyTokenStaff, orderController.getTotalPrice)
+router.get('/show-order-staff', orderController.showOrderForStaff)
 module.exports = router

@@ -153,6 +153,20 @@ class OrderController {
             })
             .catch(next)
     }
+    async showOrderForStaff(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const orders = await WorkSlot.find({staff_id:acc_id}, {_id: 0, oder_id: 1}).populate([{
+                path: 'order_id',
+                model: 'order'
+            }])
+            res.stats(200).json(orders)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 
     showLastestOrder (req, res, next) {
         Order.find().sort({_id:-1}).limit(10)
@@ -182,11 +196,18 @@ class OrderController {
              const token = req.headers.token
              const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
              const acc_id = accountInfo.id
-             const booking = await Booking.findOne({acc_id: acc_id})
-             const order = await Order.findOne({_id: orderId, booking_id: booking.id}).populate([
+             const order = await Order.findOne({_id: orderId}).populate([
                 {
                     path: 'orderDetails_id',
                     model: 'orderdetail'
+                },
+                {
+                    path: 'booking_id',
+                    model: 'booking',
+                    select: 'acc_id',
+                    match: {
+                        acc_id: {$eq: acc_id}
+                    }
                 }
              ])
              res.status(200).json(order)
