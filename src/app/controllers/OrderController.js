@@ -161,8 +161,54 @@ class OrderController {
             .catch(next)
     }
 
+    async getOrderByIdForCus (req, res) {
+        try {
+             const orderId = req.params.id
+             const token = req.headers.token
+             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+             const acc_id = accountInfo.id
+             const booking = await Booking.findOne({acc_id: acc_id})
+             const order = await Order.findOne({_id: orderId, booking_id: booking.id}).populate([
+                {
+                    path: 'orderDetails_id',
+                    model: 'orderdetail'
+                }
+             ])
+             re.status(200).json(order)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     searchOrderById(req, res, next) {
-        Order.findById(req.params.id)
+        Order.findById(req.params.id).populate([{
+            path: 'orderDetails_id',
+            model: 'orderdetail',
+            populate:[
+                {
+                    path: 'service_id',
+                    model: 'service',
+                    select: 'name description type price hasAccessory'
+                },
+                {
+                    path: 'accessory_id',
+                    model: 'accessory',
+                    select: 'name description insurance price service_id supplier_id',
+                    populate:[
+                        {
+                            path: 'service_id',
+                            model: 'service',
+                            select: 'name description type price hasAccessory'
+                        },
+                        {
+                            path: 'supplier_id',
+                            model: 'supplier',
+                            select: 'name'
+                        }
+                    ]
+                }
+            ]
+        }])
             .then(order => {
                 res.json(order)
             })

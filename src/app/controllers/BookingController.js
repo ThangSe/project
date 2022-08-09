@@ -36,6 +36,63 @@ class BookingController {
         }
     }
 
+    async showAllBookingWithOrderInfo (req, res) {
+        try {
+            const {page = 1, limit = 10} = req.query
+            const sort = req.query.sort
+            let bookings = await Booking.find().limit(limit * 1).skip((page - 1) * limit).populate([
+                {
+                    path: 'order_id',
+                    model: 'order',
+                    select: 'status'
+                }
+            ])
+            let count = await Booking.find().count()/10
+            if(sort == "desc" && !req.query.status) {
+                bookings = await Booking.find().sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    {
+                        path: 'order_id',
+                        model: 'order',
+                        select: 'status'
+                    }
+                ])
+                return res.status(200).json({count: Math.ceil(count), bookings})
+            }
+            else if(req.query.status) {
+                var flag = 1
+                if(sort == "desc") {
+                    flag = -1
+                    bookings = await Booking.find({status:req.query.status}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit).populate([
+                        {
+                            path: 'order_id',
+                            model: 'order',
+                            select: 'status'
+                        }
+                    ])
+                    count = await Booking.find({status:req.query.status}).count()/10
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }
+                else {
+                    bookings = await Booking.find({status:req.query.status}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit).populate([
+                        {
+                            path: 'order_id',
+                            model: 'order',
+                            select: 'status'
+                        }
+                    ])
+                    count = await Booking.find({status:req.query.status}).count()/10
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }      
+            }
+            else {
+                return res.status(200).json({count: Math.ceil(count), bookings})
+            }
+
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     showAllBookingByAccount (req, res, next) {
         const token = req.headers.token
         const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
@@ -55,6 +112,19 @@ class BookingController {
                 res.json(booking)
             })
             .catch(next)
+    }
+
+    async getBookingByIdForCus(req, res) {
+        try {
+             const bookingId = req.params.id
+             const token = req.headers.token
+             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+             const acc_id = accountInfo.id
+             const booking = await Booking.findOne({_id: bookingId, acc_id: acc_id})
+             res.stauts(200).json(booking)
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 
     async createBookingCustomer(req, res) {
@@ -106,6 +176,22 @@ class BookingController {
             res.status(500).json(err)
         }
     }
+
+    async updateBookingByIdForCus(req, res) {
+        try {
+            const token = req.headers.token
+            const bookingId = req.params.id
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const filter = {_id: bookingId, acc_id: acc_id}
+            const update = {$set: req.body}
+            const updateBooking = await Booking.findByIdAndUpdate(filter, update, {new: true})
+            res.status(200).json(updateBooking)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    
     //PATCH /booking/accept-booking (Manager)
     async acceptBooking(req, res) {
         try {

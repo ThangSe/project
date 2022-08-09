@@ -5,7 +5,6 @@ const Schema = mongoose.Schema
 
 const Service = new Schema({
     name: {type: String, required: true},
-    price: {type: Number},
     description: {type: String, required: true},
     type: {type: String, required: true},
     price: {type: Number, required: true},
