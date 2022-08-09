@@ -279,17 +279,13 @@ class ScheduleController {
         try {
             const start = format(startOfWeek(new Date(), {weekStartsOn: 1}),'yyyy-MM-dd')
             const end = format(endOfWeek(new Date(), {weekStartsOn: 1}), 'yyyy-MM-dd')
-            console.log({start, end})
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
-            const workSlots = await WorkSlot.find({staff_id:acc_id}).populate([{
+            const workSlots = await WorkSlot.find({staff_id:acc_id, slot_id: {$ne: null}}).populate([{
                 path: 'slot_id',
                 model: 'slot',
-                select: 'slot start end status schedule_id',
-                match: {
-                    schedule_id : {$exists: true}
-                },
+                select: 'slot start end status schedule_id',   
                 populate: {
                     path: 'schedule_id',                 
                     model: 'schedule',
@@ -300,7 +296,7 @@ class ScheduleController {
                             $lte: end
                         }
                     }
-                }
+                },
             },
             {
                 path: 'order_id',

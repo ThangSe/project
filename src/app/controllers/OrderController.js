@@ -161,6 +161,10 @@ class OrderController {
             const orders = await WorkSlot.find({staff_id: acc_id, order_id: {$exists: true}}, {_id: 0, oder_id: 1}).populate([{
                 path: 'order_id',
                 model: 'order',
+                populate: {
+                    path: 'booking_id',
+                    model: 'booking'
+                }
             }])
             res.status(200).json(orders)
         } catch (err) {
