@@ -78,7 +78,7 @@ class OrderController {
                     {_id: saveOrderDetail.id}, 
                     {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
                     {new: true}
-                ).populate()
+                )
                 res.status(200).json(lastestDetail)
             }
             else {
@@ -212,7 +212,7 @@ class OrderController {
                         {
                             path: 'service_id',
                             model: 'service',
-                            select: 'name price'
+                            select: 'name price hasAccessory'
                         },
                         {
                             path: 'accessory_id',
