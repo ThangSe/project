@@ -137,7 +137,7 @@ class OrderController {
                 path: 'orderDetails_id',
                 model: 'orderdetail'
             }])
-            res.status(200).json(updateOrder)
+            res.status(200).json(updateOrder)   
 
         } catch (err) {
             res.status(500).json(err)
@@ -163,9 +163,30 @@ class OrderController {
                 model: 'order',
                 populate: {
                     path: 'booking_id',
-                    model: 'booking'
+                    model: 'booking',
+                    populate: {
+                        path: 'acc_id',
+                        model: 'account',
+                        select: 'user_id',
+                        populate: {
+                            path: 'user_id',
+                            model: 'user',
+                            select: 'name'
+                        }
+                    }
                 }
-            }])
+            },
+            {
+                path: 'staff_id',
+                model: 'account',
+                select: 'user_id',
+                populate: {
+                    path: 'user_id',
+                    model: 'user',
+                    select: 'name'
+                }
+            }
+        ])
             res.status(200).json(orders)
         } catch (err) {
             res.status(500).json(err)
