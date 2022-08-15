@@ -104,8 +104,8 @@ class AccountController {
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
             const oldPass = req.body.oldpass
-            const repeatPass = req.body.repeatpass
             const newPass = req.body.newpass
+            const repeatPass = req.body.repeatpass
             const account = await Account.findById(acc_id)
             const validOldPass = await bcrypt.compare(
                 oldPass,
@@ -113,9 +113,9 @@ class AccountController {
             )
             const validRepeatPass  = await bcrypt.compare(
                 repeatPass,
-                account.password
+                newPass
             )
-            if(oldPass.localeCompare(repeatPass)) {
+            if(newPass.localeCompare(repeatPass)) {
                 return res.status(404).json("Mật khẩu nhập lại không trùng khớp")
             }
             else if(!validOldPass) {

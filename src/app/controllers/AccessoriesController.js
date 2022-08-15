@@ -48,21 +48,6 @@ class AccessoriesController {
             res.status(500).json(err)
         }
     }
-    async test1(req, res) {
-        try {
-            const listAccId = req.body.accessories
-            var a = []
-            listAccId.forEach(async function(e) {
-                const accessory = await Accessory.findById(e.id)
-                console.log(accessory)
-            })
-            
-            res.status(200).json(a)
-        } catch (err) {
-            res.status(500).json(err)
-            
-        }
-    }
 }
 
 module.exports = new AccessoriesController()

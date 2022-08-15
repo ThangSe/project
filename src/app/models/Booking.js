@@ -17,7 +17,8 @@ const Booking = new Schema({
     status: {type: String, required: true, default: 'Đang xử lí'},
     phonenum: {type: String, required: true},
     acc_id: {type: mongoose.Schema.Types.ObjectId, ref: "account"},
-    order_id: {type: mongoose.Schema.Types.ObjectId, ref: "order"}
+    order_id: {type: mongoose.Schema.Types.ObjectId, ref: "order"},
+    computer_id: {type: mongoose.Schema.Types.ObjectId, ref: "computer"}
 }, {
     timestamps: true,
 })  

@@ -8,6 +8,7 @@ const accesoryRouter = require('./accessory')
 const serviceRouter = require('./service')
 const orderRouter = require('./order')
 const scheduleRouter = require('./schedule')
+const chartRouter = require('./chart')
 
 function route(app) {
     app.use('/auth', authRouter)
@@ -18,6 +19,7 @@ function route(app) {
     app.use('/order', orderRouter)
     app.use('/service', serviceRouter)
     app.use('/schedule', scheduleRouter)
+    app.use('/chart', chartRouter)
     app.use((req, res, next) => {
         res.status(404)
         res.json({

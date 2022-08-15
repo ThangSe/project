@@ -17,6 +17,9 @@ const Agency = new Schema({
     ],
     admin_id:[
         {type: mongoose.Schema.Types.ObjectId, ref:"account"}
+    ],
+    booking_id: [
+        {type: mongoose.Schema.Types.ObjectId, ref:"booking"}
     ]
 }, {
     timestamps: true,

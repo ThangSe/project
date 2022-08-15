@@ -11,9 +11,6 @@ const Service = new Schema({
     hasAccessory: {type: Boolean, required:true, default: false},
     orderdetail_id: [
         {type: mongoose.Schema.Types.ObjectId, ref:"orderdetail"}
-    ],
-    accessories_id: [
-        {type: mongoose.Schema.Types.ObjectId, ref:"accessory"}
     ]
 }, {
     timestamps: true,

@@ -1,5 +1,5 @@
 const parse = require('date-fns/parse')
-const isDate = require('date-fns/isDate')
+const formatInTimeZone = require('date-fns-tz/formatInTimeZone')
 const format = require('date-fns/format')
 const Schedule = require('../models/Schedule')
 const Slot = require('../models/Slot')
@@ -7,15 +7,17 @@ const WorkSlot = require('../models/WorkSlot')
 const Account = require('../models/Account')
 const Order = require('../models/Order')
 const Buffer = require('buffer/').Buffer
-var startOfWeek = require('date-fns/startOfWeek')
-var endOfWeek = require('date-fns/endOfWeek')
+const _ = require('lodash');
+const startOfWeek = require('date-fns/startOfWeek')
+const endOfWeek = require('date-fns/endOfWeek')
 
 class ScheduleController {
     // POST /schedule/assignslot
     async assignWorkSlot(req, res) {
         try {
             const dateString = req.body.date
-            const date = parse(dateString, 'yyyy-MM-dd', new Date())            
+            
+            const date = formatInTimeZone(parse(dateString, 'yyyy-MM-dd', new Date()), 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ssXXX')
             // const formatdate = format(date, 'yyyy-MM-dd')
             const slot = req.body.slot
             const start = req.body.start
@@ -271,10 +273,6 @@ class ScheduleController {
         }
     }
 
-    test(req,res) {
-
-    }
-
     async showOneWeekWorkStaff(req, res) {
         try {
             const start = format(startOfWeek(new Date(), {weekStartsOn: 1}),'yyyy-MM-dd')
@@ -308,8 +306,11 @@ class ScheduleController {
                     select:'cus_name services description type cus_address phonenum'
                 }
             }
-        ]).exec()
-            res.status(200).json(workSlots)
+        ])
+            const filter = _.filter(workSlots, function(o){
+                return o.slot_id
+            })
+            res.status(200).json(filter)
         } catch (err) {
             res.status(500).json(err)
         }
