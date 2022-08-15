@@ -3,5 +3,7 @@ const middlewareController = require("../app/controllers/MiddlewareController")
 const router = require("express").Router()
 
 router.get("/all-service", middlewareController.verifyToken, serviceController.showAllService)
-router.post("/create-service", middlewareController.verifyTokenManager, serviceController.createNewService)
+router.post("/new-service", middlewareController.verifyTokenManager, serviceController.createNewService)
+router.get("/:id", middlewareController.verifyTokenStaff, serviceController.getService)
+router.patch("/:id", middlewareController.verifyTokenManager, serviceController.updateService)
 module.exports = router
