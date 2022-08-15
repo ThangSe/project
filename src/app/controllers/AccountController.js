@@ -97,6 +97,30 @@ class AccountController {
             })
             .catch(next)
     }
+    //GET
+    getAllCusAccount(req, res, next) {
+        Account.find({role: "customer"}).populate("user_id")
+            .then(accounts => {
+                res.status(200).json(accounts)
+            })
+            .catch(next)
+    }
+    //GET
+    getAllStaffAccount(req, res, next) {
+        Account.find({role: "staff"}).populate("user_id")
+            .then(accounts => {
+                res.status(200).json(accounts)
+            })
+            .catch(next)
+    }
+    //GET
+    getAllManagerAccount(req, res, next) {
+        Account.find({role: "manager"}).populate("user_id")
+            .then(accounts => {
+                res.status(200).json(accounts)
+            })
+            .catch(next)
+    }
     //PATCH /change-password change password(customer)
     async updateAccountById(req, res) {
         try {
