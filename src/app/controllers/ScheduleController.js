@@ -15,51 +15,81 @@ class ScheduleController {
     // POST /schedule/assignslot
     async assignWorkSlot(req, res) {
         try {
-            const dateString = req.body.date
-            
-            const date = formatInTimeZone(parse(dateString, 'yyyy-MM-dd', new Date()), 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ssXXX')
-            // const formatdate = format(date, 'yyyy-MM-dd')
-            const slot = req.body.slot
-            const start = req.body.start
-            const end = req.body.end
+            const datas = req.body.datas
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
-            const existedSchedule = await Schedule.findOne({date: date})
-            if(existedSchedule) {        
-                const existedSlot = await Slot.findOne({$and:[
-                    {slot: slot},
-                    {schedule_id: existedSchedule.id}    
-                ]})
-                if(existedSlot) {
-                    if(existedSlot.work_slot.length < existedSlot.max_per) {
-                        const existedStaff = await WorkSlot.findOne({$and:[
-                            {staff_id: acc_id},
-                            {slot_id: existedSlot.id}
-                        ]})
-                        if(existedStaff) {
-                            return res.status(500).json('Bạn đã đăng kí slot làm việc này rồi')
+            const message = []
+            const flag = []
+            for(const data of datas) {
+                const dateString = data.date
+                const date = formatInTimeZone(parse(dateString, 'yyyy-MM-dd', new Date()), 'Asia/Bangkok', 'yyyy-MM-dd')
+                const slot = data.slot
+                const start = data.start
+                const end = data.end
+                const existedSchedule = await Schedule.findOne({date: date})
+                if(existedSchedule) {        
+                    const existedSlot = await Slot.findOne({$and:[
+                        {slot: slot},
+                        {schedule_id: existedSchedule.id}    
+                    ]})
+                    if(existedSlot) {
+                        if(existedSlot.work_slot.length < existedSlot.max_per) {
+                            const existedStaff = await WorkSlot.findOne({$and:[
+                                {staff_id: acc_id},
+                                {slot_id: existedSlot.id}
+                            ]})
+                            if(existedStaff) {
+                                flag.push(0)
+                                message.push({Warning: "Bạn đã đăng kí slot " + slot + " ngày " + date + " rồi"})
+                            }
+                            else {
+                                const workSlot = new WorkSlot({
+                                    slot_id: existedSlot.id,
+                                    staff_id: acc_id
+                                })
+                                const saveWorkSlot = await workSlot.save()
+                                await existedSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
+                                await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
+                                flag.push(1)
+                                message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"})
+                            }                        
                         }
                         else {
-                            const workSlot = new WorkSlot({
-                                slot_id: existedSlot.id,
-                                staff_id: acc_id
-                            })
-                            const saveWorkSlot = await workSlot.save()
-                            await existedSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
-                            await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                            return res.status(200).json('Đăng kí slot làm việc thành công')
-                        }                        
+                            flag.push(-1)
+                            message.push({Warning: "Slot " + slot + " ngày " + date + " đã đủ người"})
+                        }                    
+                    } else {
+                        const newSlot = new Slot({
+                            slot,
+                            start,
+                            end,
+                            schedule_id: existedSchedule.id
+                        })
+                        const saveSlot = await newSlot.save()
+                        const workSlot = new WorkSlot({
+                            slot_id: saveSlot.id,
+                            staff_id: acc_id
+                        })
+                        const saveWorkSlot = await workSlot.save()
+                        await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
+                        await existedSchedule.updateOne({$push: {slots: saveSlot.id}})
+                        await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
+                        flag.push(1)
+                        message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"})
+
                     }
-                    else {
-                        return res.status(500).json('slot làm việc đã đủ người')
-                    }                    
-                } else {
+                }
+                else {
+                    const newSchedule = new Schedule({
+                        date: date
+                    })
+                    const saveSchedule = await newSchedule.save()
                     const newSlot = new Slot({
                         slot,
                         start,
                         end,
-                        schedule_id: existedSchedule.id
+                        schedule_id: saveSchedule.id
                     })
                     const saveSlot = await newSlot.save()
                     const workSlot = new WorkSlot({
@@ -68,35 +98,14 @@ class ScheduleController {
                     })
                     const saveWorkSlot = await workSlot.save()
                     await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
-                    await existedSchedule.updateOne({$push: {slots: saveSlot.id}})
+                    await saveSchedule.updateOne({$push: {slots: saveSlot.id}})
                     await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                    return res.status(200).json('Đăng kí slot làm việc thành công')
-
+                    flag.push(1)
+                    message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"}) 
                 }
-            }
-            else {
-                const newSchedule = new Schedule({
-                    date: date
-                })
-                const saveSchedule = await newSchedule.save()
-                const newSlot = new Slot({
-                    slot,
-                    start,
-                    end,
-                    schedule_id: saveSchedule.id
-                })
-                const saveSlot = await newSlot.save()
-                const workSlot = new WorkSlot({
-                    slot_id: saveSlot.id,
-                    staff_id: acc_id
-                })
-                const saveWorkSlot = await workSlot.save()
-                await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
-                await saveSchedule.updateOne({$push: {slots: saveSlot.id}})
-                await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                return res.status(200).json('Đăng kí slot làm việc thành công')
-            }
-
+                }
+                console.log(flag)
+                res.status(200).json(message)
         } catch (err) {
             res.status(500).json(err)
         }

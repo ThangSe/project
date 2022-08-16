@@ -8,7 +8,6 @@ const endOfYear = require('date-fns/endOfYear')
 const Booking = require('../models/Booking')
 const Account = require('../models/Account')
 const Order = require('../models/Order')
-const formatInTimeZone = require('date-fns-tz/formatInTimeZone')
 class ChartController {
     async dataToChart (req, res) {
         try {
