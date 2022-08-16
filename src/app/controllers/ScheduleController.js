@@ -100,7 +100,6 @@ class ScheduleController {
                     message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"}) 
                 }
                 }
-                console.log(flag)
                 res.status(200).json(message)
         } catch (err) {
             res.status(500).json(err)
