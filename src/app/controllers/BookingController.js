@@ -133,41 +133,14 @@ class BookingController {
 
     async createBookingCustomer(req, res) {
         try {
-             const token = req.headers.token
-             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-             const acc_id = accountInfo.id
-             const data = req.body
-             const booking = new Booking({
-                cus_name: data.cus_name,
-                services: data.services,
-                description: data.description,
-                type: data.type,
-                cus_address: data.cus_address,
-                phonenum: data.phonenum
-             })
-             const saveBooking = await booking.save()
-             const existedComputer = await Computer.findOne({code: data.code_com})
-             if(existedComputer) {
-                await Computer.findByIdAndUpdate({_id: existedComputer.id}, {$push: {booking_id: saveBooking.id}})
-                await Booking.findByIdAndUpdate({_id: saveBooking.id}, {$set: {computer_id: existedComputer.id}})
-            } else {
-                const computer = new Computer({
-                    name: data.name_com,
-                    code: data.code_com,
-                    type: data.type_com,
-                    brand: data.brand_com
-                })
-                const saveComputer = await computer.save()
-                await Computer.findByIdAndUpdate({_id: saveComputer.id}, {$push: {booking_id: saveBooking.id}})
-                await Booking.findByIdAndUpdate({_id: saveBooking.id}, {$set: {computer_id: saveComputer.id}})
-            }
-            const finalBooking = await Booking.findByIdAndUpdate({_id: saveBooking.id}, {$set: {acc_id: acc_id}}, {new: true}).populate([{
-                path: 'computer_id',
-                model: 'computer',
-                select: 'name code type brand'
-            }])
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const booking = new Booking(req.body)
+            const saveBooking = await booking.save()
+            const finalBooking = await Booking.findByIdAndUpdate({_id: saveBooking.id}, {$set: {acc_id: acc_id}}, {new: true})
             await Account.findByIdAndUpdate({_id: acc_id}, {$push: {booking: saveBooking.id}})
-             res.status(200).json(finalBooking)
+            res.status(200).json(finalBooking)
         } catch (err) {
             res.status(500).json(err)
         }
