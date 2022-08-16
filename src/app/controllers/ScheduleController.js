@@ -20,7 +20,6 @@ class ScheduleController {
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
             const message = []
-            const flag = []
             for(const data of datas) {
                 const dateString = data.date
                 const date = formatInTimeZone(parse(dateString, 'yyyy-MM-dd', new Date()), 'Asia/Bangkok', 'yyyy-MM-dd')
@@ -40,7 +39,6 @@ class ScheduleController {
                                 {slot_id: existedSlot.id}
                             ]})
                             if(existedStaff) {
-                                flag.push(0)
                                 message.push({Warning: "Bạn đã đăng kí slot " + slot + " ngày " + date + " rồi"})
                             }
                             else {
@@ -51,12 +49,10 @@ class ScheduleController {
                                 const saveWorkSlot = await workSlot.save()
                                 await existedSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
                                 await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                                flag.push(1)
                                 message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"})
                             }                        
                         }
                         else {
-                            flag.push(-1)
                             message.push({Warning: "Slot " + slot + " ngày " + date + " đã đủ người"})
                         }                    
                     } else {

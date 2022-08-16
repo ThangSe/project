@@ -17,5 +17,5 @@ router.patch("/editprofile", middlewareController.verifyToken, accountController
 router.post("/register-staff", accountController.registerAccountStaff)
 router.post("/editimgprofile",/* middlewareController.verifyToken,*/ accountController.updateImgProfileAccount)
 router.patch("/:id/restore", middlewareController.verifyTokenManager,  accountController.restoreAccount)
-router.delete("/:id", middlewareController.verifyTokenAdmin, accountController.deleteAccount)
+router.delete("/:id", middlewareController.verifyTokenManager, accountController.deleteAccount)
 module.exports = router

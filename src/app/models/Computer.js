@@ -7,8 +7,8 @@ const Computer = new Schema({
     code: {type: String},
     type: {type: String, required: true},
     brand: {type: String, required: true},
-    booking_id: [
-        {type: mongoose.Schema.Types.ObjectId, ref: "booking"}
+    order: [
+        {type: mongoose.Schema.Types.ObjectId, ref: "order"}
     ],
 }, {
     timestamps: true,

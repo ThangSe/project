@@ -5,6 +5,7 @@ router.get('/show-service-to-choose',middlewareController.verifyTokenStaff, orde
 router.get('/show/order-staff', orderController.showOrderForStaff)
 router.get('/all', middlewareController.verifyTokenManager, orderController.showAllOrder)
 router.patch('/accept-order', middlewareController.verifyTokenManager, orderController.acceptOrder)
+router.patch('/computer-to-order/:id', middlewareController.verifyTokenStaff, orderController.addComputerToOrderById)
 router.patch('/complete-order', middlewareController.verifyTokenStaff, orderController.completeOrder)
 router.patch('/cancel-order', middlewareController.verifyTokenStaff, orderController.cancelOrder)
 router.get('/staff/:id', middlewareController.verifyTokenStaff, orderController.getOrderByStaff)

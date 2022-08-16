@@ -85,7 +85,7 @@ class AuthController {
     }
 
     async login(req, res, next) {
-        const account = await Account.findOne({ username: req.body.username })
+        const account = await Account.findOne({ username: req.body.username, deleted: false })
         if (!account) {
             return res.status(404).json("User not existed")
         }

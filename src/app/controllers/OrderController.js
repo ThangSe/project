@@ -4,7 +4,7 @@ const Service = require("../models/Service")
 const OrderDetail = require("../models/OrderDetail")
 const Booking = require("../models/Booking")
 const Accessory = require('../models/Accessory')
-const mongoose = require("mongoose")
+const Computer = require('../models/Computer')
 const Buffer = require('buffer/').Buffer
 class OrderController {
     // GET order/test1
@@ -289,6 +289,25 @@ class OrderController {
         try {
             const order = await Order.findById(req.params.id)
             await order.updateOne({$set: req.body})
+            res.status(200).json("Cập nhật thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async addComputerToOrderById(req, res) {
+        try {
+            const data = req.body
+            const orderId = req.params.id
+            const existedComputer = await Computer.findOne({code: data.code})
+            if(existedComputer) {
+                await Computer.findByIdAndUpdate({_id: existedComputer.id}, {$push: {order_id: orderId}})
+                await Order.findByIdAndUpdate({_id: orderId}, {$set: {computer_id: existedComputer.id}})
+            } else {
+                const computer = new Computer(data)
+                const saveComputer = await computer.save()
+                await Computer.findByIdAndUpdate({_id: saveComputer.id}, {$push: {order_id: orderId}})
+                await Order.findByIdAndUpdate({_id: orderId}, {$set: {computer_id: saveComputer.id}})
+            }
             res.status(200).json("Cập nhật thành công")
         } catch (err) {
             res.status(500).json(err)
