@@ -71,7 +71,6 @@ class ScheduleController {
                         await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
                         await existedSchedule.updateOne({$push: {slots: saveSlot.id}})
                         await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                        flag.push(1)
                         message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"})
 
                     }
@@ -96,7 +95,6 @@ class ScheduleController {
                     await saveSlot.updateOne({$push: {work_slot: saveWorkSlot.id}})
                     await saveSchedule.updateOne({$push: {slots: saveSlot.id}})
                     await Account.findByIdAndUpdate({_id: acc_id}, {$push: {workslot_id: saveWorkSlot.id}})
-                    flag.push(1)
                     message.push({Success: "Đăng kí slot làm việc ngày " + date + " slot " + slot + " thành công"}) 
                 }
                 }
