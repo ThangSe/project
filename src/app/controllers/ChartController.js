@@ -1,4 +1,5 @@
 const parse = require('date-fns/parse')
+const formatInTimeZone = require('date-fns-tz/formatInTimeZone')
 const isDate = require('date-fns/isDate')
 const format = require('date-fns/format')
 const startOfDay = require('date-fns/startOfDay')
@@ -13,15 +14,17 @@ const Order = require('../models/Order')
 class ChartController {
     async dataToChart (req, res) {
         try {
-            const datesStrs = req.body.dates
+            const datesStr = req.body.dates
             const types = req.body.types    
             const filter = req.body.filter
-            const dates = datesStrs.map(date => parse(date, 'yyyy-MM-dd', new Date()))
+            const dates = datesStr.map(d => new Date(d))
+            console.log(dates)
+            
             const data = []
             if(types.indexOf("totalbooking") > -1 && filter == 'bydate') {
-                const counts = []
+                const counts = []         
                 for (var i = 0; i < dates.length; i++) {
-                    const count = await Booking.find({updatedAt:{$gte: startOfDay(dates[i]),$lt: endOfDay(dates[i])}}).count()    
+                    const count = await Booking.find({updatedAt:{$gte: startOfDay(dates[i]),$lt: endOfDay(dates[i])}}).count()
                     counts.push(count)
                 }
                 const totalBooking = {label: "Tổng số lịch hẹn theo ngày", data: counts}
@@ -45,8 +48,8 @@ class ChartController {
             }
             if(types.indexOf("newcustomer") > -1 && filter == 'bydate') {
                 const counts = []
-                for (var i = 0; i < dates.length; i++) {
-                    const count = await Account.find({createdAt:{$gte: startOfDay(dates[i]),$lt: endOfDay(dates[i])}}).count()    
+                for (var i = 0; i < dates.length; i++) { 
+                    const count = await Account.find({createdAt:{$gte: startOfDay(dates[i]),$lt: endOfDay(dates[i])}}).count()
                     counts.push(count)   
                 }
                 const totalNewCus = {label: "Số khách hàng mới theo ngày", data: counts}

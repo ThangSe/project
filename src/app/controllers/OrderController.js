@@ -2,7 +2,7 @@ const Order = require("../models/Order")
 const WorkSlot = require("../models/WorkSlot")
 const Service = require("../models/Service")
 const OrderDetail = require("../models/OrderDetail")
-const Booking = require("../models/Booking")
+const ServiceAccessory = require("../models/ServiceAccessory")
 const Accessory = require('../models/Accessory')
 const Computer = require('../models/Computer')
 const Buffer = require('buffer/').Buffer
@@ -10,40 +10,38 @@ class OrderController {
     // GET order/test1
     async showAllServiceToChoose(req, res) {    
         try {
-            const serviceNoAcc = await Service.find({hasAccessory: false})
-            const serviceHasAcc = await Service.aggregate([
-                {
-                    $unwind: "$accessories_id"
-                },
-                {
-                    $lookup: {
-                        from: "accessories",
-                        localField: "accessories_id",
-                        foreignField: "_id",
-                        as: "accessories_detail"
-                    }
-                }, 
-                {
-                    $project: {
-                        _id: 0,
-                        name: 1,
-                        description: 1,
-                        type: 1,
-                        "accessories_detail._id": 1,
-                        "accessories_detail.name": 1,
-                        "accessories_detail.description": 1,
-                        "accessories_detail.insurance": 1,
-                        price: {$add: ["$price", {$toInt:{
-                            $reduce: {
-                                input: "$accessories_detail",
-                                initialValue: "",
-                                in: { $concat: [ "$$value", {$substr:["$$this.price", 0, -1]}]}
-                            }
-                        }}]}
-                    }
+            const typeCom = req.query.typeCom
+            const brandCom = req.query.brandCom
+            const typeSer = req.query.typeSer
+            const hasAccessory = Boolean((req.query.hasAccessory || "").replace(/\s*(false|null|undefined|0)\s*/i, ""))
+            if(hasAccessory) {
+                const serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom, brandCom: brandCom}, 'service_id')
+                const service_id = []
+                for(const ser of serviceAndAccessory) {
+                    service_id.push(ser.service_id)
                 }
-            ])
-            res.status(200).json({serviceHasAcc, serviceNoAcc})
+                const service = await Service.find({type: typeSer}).where('_id').in(service_id).populate([
+                    {
+                        path: 'serHasAcc',
+                        model: 'serviceaccessory',
+                        select: 'accessory_id',
+                        populate: {
+                            path: 'accessory_id',
+                            model: 'accessory',
+                            select: 'name price type component description insurance supplier_id',
+                            populate: {
+                                path: 'supplier_id',
+                                model: 'supplier',
+                                select: 'name'
+                            }
+                        }
+                    }
+                ])
+                res.status(200).json(service)
+            } else {
+                const service = await Service.find({hasAccessory: hasAccessory, type: typeSer},  'name price type description')
+                res.status(200).json(service)
+            }
         } catch (err) {
             res.status(500).json(err)
         }
@@ -53,7 +51,7 @@ class OrderController {
         try {
             const order = await Order.findById(req.params.id)            
             const hasAccessory = req.body.hasAccessory
-            const amountSer = req.body.amount_ser
+            const amountAcc = req.body.amountAcc
             const discount = req.body.discount
             const listAccId = req.body.accessories
             const serId = req.body.service_id
