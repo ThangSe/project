@@ -1,4 +1,5 @@
 const parse = require('date-fns/parse')
+const format = require('date-fns/format')
 const startOfDay = require('date-fns/startOfDay')
 const endOfDay = require('date-fns/endOfDay')   
 const startOfMonth = require('date-fns/startOfMonth')
@@ -96,6 +97,13 @@ class ChartController {
             res.status(500).json(err)
         }
         
+    }
+    async dataForDashboard(req, res) {
+        try {
+            const toDay = new Date()
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 
 }

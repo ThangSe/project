@@ -277,7 +277,7 @@ class ScheduleController {
 
     async showWorkSlotByStaffId(req, res) {
         try {
-            const staffId = req.params.staffId
+            const staffId = req.params.id
             const workSlot = await WorkSlot.find({staff_id: staffId})
             res.status(200).json(workSlot)
         } catch (err) {
