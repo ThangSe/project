@@ -81,20 +81,20 @@ class OrderController {
             res.status(500).json(err)
         }
     }
+    
     //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
-            const order = await Order.findById(req.params.id)            
+            const order = await Order.findById(req.params.id)    
             const hasAccessory = req.body.hasAccessory
-            const amountAcc = req.body.amountAcc
             const discount = req.body.discount
             const listAccId = req.body.accessories
-            const serId = req.body.service_id
+            const serId = req.body.serviceId
             var priceAcc = 0
             if(hasAccessory) {
                 const orderDetail = new OrderDetail({
-                    amount_ser: amountSer,
                     discount,
+                    service_id: serId,
                     accessories: req.body.accessories
                 })
                 const saveOrderDetail = await orderDetail.save()
@@ -106,7 +106,7 @@ class OrderController {
                 const service = await Service.findById(serId)
                 await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
                 await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-                const totalPrice = (priceAcc + amountSer*service.price)*(100-discount)/100
+                const totalPrice = (priceAcc + service.price)*(100-discount)/100
                 const lastestDetail = await OrderDetail.findByIdAndUpdate(
                     {_id: saveOrderDetail.id}, 
                     {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
@@ -116,7 +116,6 @@ class OrderController {
             }
             else {
                 const orderDetail = new OrderDetail({
-                    amount_ser: amountSer,
                     discount,
                     service_id: serId
                 })
@@ -124,7 +123,7 @@ class OrderController {
                 const service = await Service.findById(serId)
                 await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
                 await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-                const totalPrice = (amountSer*service.price)*(100-discount)/100
+                const totalPrice = service.price*(100-discount)/100
                 const lastestDetail = await OrderDetail.findByIdAndUpdate(
                     {_id: saveOrderDetail.id},
                     {price_after: totalPrice, order_id: order.id, service_id: service.id}, 

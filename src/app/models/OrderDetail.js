@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 const OrderDetail = new Schema({
-    amount_ser: {type: Number, default: 0}, 
+    amount_ser: {type: Number, default: 1}, 
     discount: {type: Number},
     price_after: {type: Number},
     order_id:{type: mongoose.Schema.Types.ObjectId, ref: "order"},
