@@ -37,6 +37,63 @@ class BookingController {
         }
     }
 
+    async showAllBookingByCusId(req, res) {
+        try {
+            const {page = 1, limit = 10} = req.query
+            const sort = req.query.sort
+            const cusId = req.params.id
+            let bookings = await Booking.find({acc_id: cusId}).limit(limit * 1).skip((page - 1) * limit).populate([
+                {
+                    path: 'order_id',
+                    model: 'order',
+                    select: 'status'
+                }
+            ])
+            let count = await Booking.find({acc_id: cusId}).count()/10
+            if(sort == "desc" && !req.query.status) {
+                bookings = await Booking.find({acc_id: cusId}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    {
+                        path: 'order_id',
+                        model: 'order',
+                        select: 'status'
+                    }
+                ])
+                return res.status(200).json({count: Math.ceil(count), bookings})
+            }
+            else if(req.query.status) {
+                var flag = 1
+                if(sort == "desc") {
+                    flag = -1
+                    bookings = await Booking.find({status:req.query.status, acc_id: cusId}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit).populate([
+                        {
+                            path: 'order_id',
+                            model: 'order',
+                            select: 'status'
+                        }
+                    ])
+                    count = await Booking.find({status:req.query.status, acc_id: cusId}).count()/10
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }
+                else {
+                    bookings = await Booking.find({status:req.query.status, acc_id: cusId}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit).populate([
+                        {
+                            path: 'order_id',
+                            model: 'order',
+                            select: 'status'
+                        }
+                    ])
+                    count = await Booking.find({status:req.query.status, acc_id: cusId}).count()/10
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }      
+            }
+            else {
+                return res.status(200).json({count: Math.ceil(count), bookings})
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async showAllBookingWithOrderInfo (req, res) {
         try {
             const {page = 1, limit = 10} = req.query
