@@ -102,11 +102,27 @@ class ChartController {
     async dataForDashboard(req, res) {
         try {
             const toDay =  new Date()
-            const datas = []
+            
             const countnewBooking = await Booking.find({createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}}).count()
             const countNewCompleteOrder = await Order.find({status: 'Hoàn thành', createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}}).count()
             const countNewCustomer = await Account.find({createdAt:{$gte: startOfMonth(toDay),$lt: endOfMonth(toDay)}}).count() 
-            datas.push(countnewBooking, countNewCompleteOrder, countNewCustomer)
+            const booking = {
+                "name": "Lịch hẹn mới trong hôm nay",
+                "count": countnewBooking
+            }
+            const order = {
+                "name": "Đơn hàng được hoàn thành trong hôm nay",
+                "count": countNewCompleteOrder
+            }
+            const customer = {
+                "name": "Khách hàng mới trong tháng này",
+                "count": countNewCustomer
+            }
+            const datas = {
+                booking,
+                order,
+                customer
+            }
             res.status(200).json(datas)
         } catch (err) {
             res.status(500).json(err)
