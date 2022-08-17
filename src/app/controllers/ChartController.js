@@ -1,4 +1,5 @@
 const parse = require('date-fns/parse')
+const isDate = require('date-fns/isDate')
 const format = require('date-fns/format')
 const startOfDay = require('date-fns/startOfDay')
 const endOfDay = require('date-fns/endOfDay')   
@@ -100,7 +101,13 @@ class ChartController {
     }
     async dataForDashboard(req, res) {
         try {
-            const toDay = new Date()
+            const toDay =  new Date()
+            const datas = []
+            const countnewBooking = await Booking.find({createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}}).count()
+            const countNewCompleteOrder = await Order.find({status: 'Hoàn thành', createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}}).count()
+            const countNewCustomer = await Account.find({createdAt:{$gte: startOfMonth(toDay),$lt: endOfMonth(toDay)}}).count() 
+            datas.push(countnewBooking, countNewCompleteOrder, countNewCustomer)
+            res.status(200).json(datas)
         } catch (err) {
             res.status(500).json(err)
         }
