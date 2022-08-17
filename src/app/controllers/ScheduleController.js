@@ -275,6 +275,16 @@ class ScheduleController {
         }
     }
 
+    async showWorkSlotByStaffId(req, res) {
+        try {
+            const staffId = req.params.staffId
+            const workSlot = await WorkSlot.find({staff_id: staffId})
+            res.status(200).json(workSlot)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async showOneWeekWorkStaff(req, res) {
         try {
             const start = format(startOfWeek(new Date(), {weekStartsOn: 1}),'yyyy-MM-dd')
