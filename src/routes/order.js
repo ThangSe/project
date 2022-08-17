@@ -9,6 +9,7 @@ router.patch('/computer-to-order/:id', middlewareController.verifyTokenStaff, or
 router.patch('/complete-order', middlewareController.verifyTokenStaff, orderController.completeOrder)
 router.patch('/cancel-order', middlewareController.verifyTokenStaff, orderController.cancelOrder)
 router.get('/staff/:id', middlewareController.verifyTokenStaff, orderController.getOrderByStaff)
+router.get('/detail-order/:id', orderController.viewDetailOrder)
 router.post('/add-detail-order/:id', middlewareController.verifyTokenStaff, orderController.addDetailOrder)
 router.get('/cus/:id', middlewareController.verifyToken, orderController.getOrderByIdForCus)
 router.get('/get-order-total-price/:id', middlewareController.verifyTokenStaff, orderController.getTotalPrice)

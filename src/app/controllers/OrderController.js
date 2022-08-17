@@ -81,7 +81,68 @@ class OrderController {
             res.status(500).json(err)
         }
     }
-    
+    async viewOrderWithDetail(req, res) {
+        try {
+            const id = req.params.id
+            const order = await Order.findById(id).populate([
+                {
+                    path: 'orderDetails_id',
+                    model: 'orderdetail',
+                    select: 'amout_ser price_after discount service_id',
+                    populate: {
+                        path: 'service_id',
+                        model: 'service',
+                        select: 'name'
+                    }
+                }
+            ])
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async viewDetailOrder(req, res) {
+        try {
+            const id = req.params.id
+            const cond = await OrderDetail.findById(id).populate([
+                {
+                    path: 'service_id',
+                    model: 'service',
+                    select: 'hasAccessory'
+                }
+            ])
+            if(cond.service_id.hasAccessory == true) {
+                const detailOrder = await OrderDetail.findById(id).populate([
+                    {
+                        path: 'service_id',
+                        model: 'service',
+                        select: 'name price'
+                    },
+                    {
+                        path: 'accessories.accessory_id',
+                        model: 'accessory',
+                        select: 'name price insurance supplier_id',
+                        populate: {
+                            path: 'supplier_id',
+                            model: 'supplier',
+                            select: 'name'
+                        }
+                    }
+                ])
+                res.status(200).json(detailOrder)
+            }else {
+                const detailOrder = await OrderDetail.findById(id).populate([
+                    {
+                        path: 'service_id',
+                        model: 'service',
+                        select: 'name price'
+                    }
+                ])
+                res.status(200).json(detailOrder)
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
     //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
