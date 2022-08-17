@@ -15,32 +15,67 @@ class OrderController {
             const typeSer = req.query.typeSer
             const hasAccessory = Boolean((req.query.hasAccessory || "").replace(/\s*(false|null|undefined|0)\s*/i, ""))
             if(hasAccessory) {
-                const serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom, brandCom: brandCom}, 'service_id')
+                var serviceAndAccessory
+                if(typeCom && brandCom) {
+                    serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom, brandCom: brandCom}, 'service_id')
+                }else if(typeCom) {
+                    serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom}, 'service_id')
+                }else if(brandCom) {
+                    serviceAndAccessory = await ServiceAccessory.find({brandCom: brandCom}, 'service_id')
+                }else {
+                    serviceAndAccessory = await ServiceAccessory.find({}, 'service_id')
+                }
                 const service_id = []
                 for(const ser of serviceAndAccessory) {
                     service_id.push(ser.service_id)
                 }
-                const service = await Service.find({type: typeSer}).where('_id').in(service_id).populate([
-                    {
-                        path: 'serHasAcc',
-                        model: 'serviceaccessory',
-                        select: 'accessory_id',
-                        populate: {
-                            path: 'accessory_id',
-                            model: 'accessory',
-                            select: 'name price type component description insurance supplier_id',
+                if(typeSer) {
+                    const service = await Service.find({type: typeSer}).where('_id').in(service_id).populate([
+                        {
+                            path: 'serHasAcc',
+                            model: 'serviceaccessory',
+                            select: 'accessory_id',
                             populate: {
-                                path: 'supplier_id',
-                                model: 'supplier',
-                                select: 'name'
+                                path: 'accessory_id',
+                                model: 'accessory',
+                                select: 'name price type component description insurance supplier_id',
+                                populate: {
+                                    path: 'supplier_id',
+                                    model: 'supplier',
+                                    select: 'name'
+                                }
                             }
                         }
-                    }
-                ])
-                res.status(200).json(service)
+                    ])
+                    res.status(200).json(service)
+                }else {
+                    const service = await Service.find().where('_id').in(service_id).populate([
+                        {
+                            path: 'serHasAcc',
+                            model: 'serviceaccessory',
+                            select: 'accessory_id',
+                            populate: {
+                                path: 'accessory_id',
+                                model: 'accessory',
+                                select: 'name price type component description insurance supplier_id',
+                                populate: {
+                                    path: 'supplier_id',
+                                    model: 'supplier',
+                                    select: 'name'
+                                }
+                            }
+                        }
+                    ])
+                    res.status(200).json(service)
+                }           
             } else {
-                const service = await Service.find({hasAccessory: hasAccessory, type: typeSer},  'name price type description')
-                res.status(200).json(service)
+                if(typeSer){
+                    const service = await Service.find({hasAccessory: hasAccessory, type: typeSer},  'name price type description')
+                    res.status(200).json(service)
+                }else {
+                    const service = await Service.find({hasAccessory: hasAccessory},  'name price type description')
+                    res.status(200).json(service)
+                }
             }
         } catch (err) {
             res.status(500).json(err)
