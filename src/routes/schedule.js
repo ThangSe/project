@@ -12,5 +12,5 @@ router.get('/show-workslot-for-assign', middlewareController.verifyTokenManager,
 router.get('/show-workslot', middlewareController.verifyTokenStaff, scheduleController.showWorkSlotStaff)
 router.get('/show-workslot-thisweek', middlewareController.verifyTokenStaff, scheduleController.showOneWeekWorkStaff)
 router.get('/show-schedule-for-assign', scheduleController.showScheduleForAssign)
-router.get('work-slot/:id', middlewareController.verifyTokenManager, scheduleController.showWorkSlotByStaffId)
+router.get('/work-slot/:id', middlewareController.verifyTokenManager, scheduleController.showWorkSlotByStaffId)
 module.exports = router
