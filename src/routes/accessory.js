@@ -3,6 +3,7 @@ const middlewareController = require("../app/controllers/MiddlewareController")
 const router = require("express").Router()
 
 router.get("/all-accessories", middlewareController.verifyToken, accessoriesController.showAllAccessory)
+router.get("/all-accessories-for-customer", middlewareController.verifyToken, accessoriesController.getAllAccessoryForCus)
 router.get("/all-accessories-by-type", middlewareController.verifyToken, accessoriesController.showAllAccessoryByType)
 router.get("/accessory-img/:filename", accessoriesController.getAllImg)
 router.post("/new-accessory",/* middlewareController.verifyTokenManager,*/ accessoriesController.createNewAccessory)

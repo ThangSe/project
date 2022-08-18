@@ -7,7 +7,7 @@ const Accessory = new Schema({
     name: {type: String, required: true},
     price: {type: Number},
     type: {type: String}, // loai may tinh
-    component: {type: String},
+    component: {type: String}, //loai phu tung
     description: {type: String, required: true},
     insurance: {type: String, required: true},
     imgURL: {type: String},
