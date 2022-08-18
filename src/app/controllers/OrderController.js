@@ -147,51 +147,77 @@ class OrderController {
     //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
-            const order = await Order.findById(req.params.id)    
-            const hasAccessory = req.body.hasAccessory
-            const discount = req.body.discount
-            const listAccId = req.body.accessories
-            const serId = req.body.serviceId
-            var priceAcc = 0
-            if(hasAccessory) {
-                const orderDetail = new OrderDetail({
-                    discount,
-                    service_id: serId,
-                    accessories: req.body.accessories
-                })
-                const saveOrderDetail = await orderDetail.save()
-                listAccId.forEach(async function(e){
-                    const accessory = await Accessory.findById(e.accessory_id)
-                    priceAcc+=(accessory.price*e.amount_acc)
-                    await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                })
-                const service = await Service.findById(serId)
-                await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
-                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-                const totalPrice = (priceAcc + service.price)*(100-discount)/100
-                const lastestDetail = await OrderDetail.findByIdAndUpdate(
-                    {_id: saveOrderDetail.id}, 
-                    {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
-                    {new: true}
-                )
-                res.status(200).json(lastestDetail)
+            const order = await Order.findById(req.params.id)
+            const datas = req.body.datas
+            for(const data of datas) {
+                const hasAccessory = data.hasAccessory
+                const discount = data.discount
+                const listAccId = data.accessories
+                const serId = data.serviceId
+                var priceAcc = 0
+                if(hasAccessory) {
+                    const orderDetail = new OrderDetail({
+                        discount,
+                        service_id: serId,
+                        accessories: data.accessories
+                    })
+                    const saveOrderDetail = await orderDetail.save()
+                    listAccId.forEach(async function(e){
+                        const accessory = await Accessory.findById(e.accessory_id)
+                        priceAcc+=(accessory.price*e.amount_acc)
+                        await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                    })
+                    const service = await Service.findById(serId)
+                    await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
+                    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
+                    const totalPrice = (priceAcc + service.price)*(100-discount)/100
+                    await OrderDetail.findByIdAndUpdate(
+                        {_id: saveOrderDetail.id}, 
+                        {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
+                        {new: true}
+                    )
+                }
+                else {
+                    const orderDetail = new OrderDetail({
+                        discount,
+                        service_id: serId
+                    })
+                    const saveOrderDetail = await orderDetail.save()
+                    const service = await Service.findById(serId)
+                    await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
+                    const totalPrice = service.price*(100-discount)/100
+                    await OrderDetail.findByIdAndUpdate(
+                        {_id: saveOrderDetail.id},
+                        {price_after: totalPrice, order_id: order.id, service_id: service.id}, 
+                        {new: true}
+                    )
+                }
             }
-            else {
-                const orderDetail = new OrderDetail({
-                    discount,
-                    service_id: serId
-                })
-                const saveOrderDetail = await orderDetail.save()
-                const service = await Service.findById(serId)
-                await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-                const totalPrice = service.price*(100-discount)/100
-                const lastestDetail = await OrderDetail.findByIdAndUpdate(
-                    {_id: saveOrderDetail.id},
-                    {price_after: totalPrice, order_id: order.id, service_id: service.id}, 
-                    {new: true}
-                )
-                res.status(200).json(lastestDetail)
+            res.status(200).json("Thêm mới thành công")  
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async deleteAllDetailOrder(req, res, next) {
+        try {
+            const order = await Order.findById(req.params.id)
+            if(order.orderDetails_id){
+                for(const orderDetailId of order.orderDetails_id) {
+                    const orderDetail = await OrderDetail.findById(orderDetailId)
+                    const accessories_id = []
+                    for(const accessory of orderDetail.accessories) {
+                        accessories_id.push(accessory.accessory_id)
+                    }
+                    await Accessory.updateMany({_id:{$in: accessories_id}}, {$pull: {orderdetail_id: orderDetailId}})
+                    await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
+                    await OrderDetail.remove({_id: orderDetailId})
+                }
+                await order.updateOne({$unset:{orderDetails_id:1}})
+                next()
+            } else {
+                next()
             }
         } catch (err) {
             res.status(500).json(err)
@@ -421,6 +447,21 @@ class OrderController {
             res.status(500).json(err)
         }
     }
+    async acceptOrderByCus(req, res) {
+        try {
+            const order = await Order.findById(req.body.id)
+            if(order.status == 'Quản lí xác nhận'){
+                await order.updateOne({$set: {status: 'Hoàn tất hóa đơn'}})
+                res.status(200).json("Đơn hàng đã hoàn tất")
+            }
+            else {
+                res.status(404).json("Đơn hàng chưa được quản lí xác nhận")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async cancelOrder(req, res) {
         try {
             const order = await Order.findById(req.body.id)
@@ -432,9 +473,13 @@ class OrderController {
     }
     async completeOrder(req, res) {
         try {
-            const order = await Order.findById(req.body.id)
-            await order.updateOne({$set: {status: 'Hoàn thành'}})
-            res.status(200).json("Đơn hàng đã hoàn thành")
+            if(order.status == 'Hoàn tất hóa đơn'){
+                await order.updateOne({$set: {status: 'Hoàn thành'}})
+                res.status(200).json("Đơn hàng đã hoàn thành")
+            }
+            else {
+                res.status(404).json("Đơn hàng chưa được khách hàng hoàn tất")
+            }
         } catch (err) {
             res.status(500).json(err)
         }

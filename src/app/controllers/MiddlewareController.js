@@ -48,6 +48,16 @@ const middlewareController = {
                 res.status(403).json("You're not allowed to do this")
             }
         })
+    },
+    verifyTokenCustomer: (req, res, next) => {
+        middlewareController.verifyToken(req,res, () => {
+            if(req.account.role == "customer") {
+                next()
+            }
+            else {
+                res.status(403).json("You're not allowed to do this")
+            }
+        })
     }
 }
 
