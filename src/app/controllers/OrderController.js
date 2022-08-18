@@ -155,7 +155,6 @@ class OrderController {
                 const listAccId = data.accessories
                 const serId = data.serviceId
                 var priceAcc = 0
-                var message
                 if(hasAccessory) {
                     const orderDetail = new OrderDetail({
                         discount,
@@ -169,12 +168,11 @@ class OrderController {
                             priceAcc+=(accessory.price*e.amount_acc)
                             await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
                         }
-                        else {
-                            message = "Error1"
-                        }
                     })
                     const service = await Service.findById(serId)
-                    await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
+                    if(service){
+                        await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
+                    }
                     await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
                     const totalPrice = (priceAcc + service.price)*(100-discount)/100
                     await OrderDetail.findByIdAndUpdate(
@@ -199,8 +197,8 @@ class OrderController {
                         {new: true}
                     )
                 }
-                res.status(200).json(message)  
             }
+            res.status(200).json("Cap nhat thanh cong")  
         } catch (err) {
             res.status(500).json(err)
         }
