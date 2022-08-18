@@ -105,7 +105,7 @@ class ServiceController {
                     populate: {
                         path: 'accessory_id',
                         model: 'accessory',
-                        select: 'name',
+                        select: 'name price type component description insurance',
                     }
                 }
             ])

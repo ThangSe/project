@@ -83,6 +83,7 @@ class AccessoriesController {
 
     async updateImgAccessories(req, res) {
         try {
+            const AccessoryId = req.params.id
             const storage = new GridFsStorage({
                 url: process.env.DB_CONNECTION,
                 file: (req, file) => {
@@ -132,7 +133,7 @@ class AccessoriesController {
         }
     }
 
-    async getAllImg(req, res) {
+    async getImg(req, res) {
         try {
             const file = await gfs.file.findOne({ filename: req.params.filename }, (err, file) => {
                 // Check if file
