@@ -53,21 +53,17 @@ class ServiceController {
     }
     async deleteAllDetailService(req, res, next) {
         try {
-            const order = await Order.findById(req.params.id)
-            if(order.orderDetails_id){
-                for(const orderDetailId of order.orderDetails_id) {
-                    const orderDetail = await OrderDetail.findById(orderDetailId)
-                    const accessories_id = []
-                    for(const accessory of orderDetail.accessories) {
-                        accessories_id.push(accessory.accessory_id)
-                    }
-                    await Accessory.updateMany({_id:{$in: accessories_id}}, {$pull: {orderdetail_id: orderDetailId}})
-                    await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
-                    await OrderDetail.deleteOne({_id: orderDetailId})
+            const service = await Service.findById(req.params.id)
+            if(service.serHasAcc){
+                for(const bridgeId of service.serHasAcc) {
+                    const bridge = await ServiceAccessory.findfindById(bridgeId)
+                    await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
+                    await Service.deleteOne({_id: bridge.service_id})
+                    await ServiceAccessory.deleteOne({_id: bridgeId})
                 }
-                await order.updateOne({$unset:{orderDetails_id:1}})
                 next()
             } else {
+                await Service.deleteOne({_id: service.id})
                 next()
             }
         } catch (err) {
