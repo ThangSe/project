@@ -6,7 +6,7 @@ const Schema = mongoose.Schema
 const Service = new Schema({
     name: {type: String, required: true},
     description: {type: String, required: true},
-    type: {type: String, required: true},
+    type: {type: String, required: true}, //type: loai dich vu
     price: {type: Number, required: true},
     hasAccessory: {type: Boolean, required:true, default: false},
     serHasAcc: [

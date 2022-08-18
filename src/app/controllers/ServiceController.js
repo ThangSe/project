@@ -93,6 +93,27 @@ class ServiceController {
             res.status(500).json(err)
         }
     }
+
+    async showAllAccessoriesOfSerive(req, res) {
+        try {
+            const serId = req.params.serviceId
+            const serHasAccessory = await Service.findOne({_id: serId, hasAccessory: true}).populate([
+                {
+                    path: 'serHasAcc',
+                    model: 'serviceaccessory',
+                    select: 'accessory_id',
+                    populate: {
+                        path: 'accessory_id',
+                        model: 'accessory',
+                        select: 'name',
+                    }
+                }
+            ])
+            res.status(200).json(serHasAccessory)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
  
 }
 

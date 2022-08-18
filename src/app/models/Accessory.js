@@ -6,7 +6,7 @@ const Schema = mongoose.Schema
 const Accessory = new Schema({
     name: {type: String, required: true},
     price: {type: Number},
-    type: {type: String},
+    type: {type: String}, // loai may tinh
     component: {type: String},
     description: {type: String, required: true},
     insurance: {type: String, required: true},
