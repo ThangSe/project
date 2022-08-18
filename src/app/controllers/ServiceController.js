@@ -101,7 +101,7 @@ class ServiceController {
                 {
                     path: 'serHasAcc',
                     model: 'serviceaccessory',
-                    select: 'accessory_id',
+                    select: 'accessory_id brandCom',
                     populate: {
                         path: 'accessory_id',
                         model: 'accessory',
