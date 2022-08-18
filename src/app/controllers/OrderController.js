@@ -315,7 +315,7 @@ class OrderController {
                 res.status(200).json(order)
             }
             else {
-                res.status(200).json("Khong tim thay order")
+                res.status(200).json("Khong tim thay don hang")
             }
         } catch (err) {
             res.status(500).json(err)

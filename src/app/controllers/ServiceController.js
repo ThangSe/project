@@ -54,7 +54,7 @@ class ServiceController {
     async deleteAllDetailService(req, res, next) {
         try {
             const service = await Service.findById(req.params.id)
-            if(service.serHasAcc){
+            if(service.serHasAcc.lengh>0){
                 for(const bridgeId of service.serHasAcc) {
                     const bridge = await ServiceAccessory.findfindById(bridgeId)
                     await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
@@ -63,7 +63,7 @@ class ServiceController {
                 }
                 next()
             } else {
-                await Service.deleteOne({_id: service.id})
+                await Service.deleteOne({_id: req.params.id})
                 next()
             }
         } catch (err) {
