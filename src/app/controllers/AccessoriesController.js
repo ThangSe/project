@@ -113,7 +113,7 @@ class AccessoriesController {
                     }
                 }
             }).array('uploadedImages', 10)
-            upload(req, res, (err) => {
+            upload(req, res, async(err) => {
                 if(err instanceof multer.MulterError) {
                     res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
                     return
