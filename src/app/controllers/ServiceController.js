@@ -51,6 +51,29 @@ class ServiceController {
         }
         
     }
+    async deleteAllDetailService(req, res, next) {
+        try {
+            const order = await Order.findById(req.params.id)
+            if(order.orderDetails_id){
+                for(const orderDetailId of order.orderDetails_id) {
+                    const orderDetail = await OrderDetail.findById(orderDetailId)
+                    const accessories_id = []
+                    for(const accessory of orderDetail.accessories) {
+                        accessories_id.push(accessory.accessory_id)
+                    }
+                    await Accessory.updateMany({_id:{$in: accessories_id}}, {$pull: {orderdetail_id: orderDetailId}})
+                    await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
+                    await OrderDetail.deleteOne({_id: orderDetailId})
+                }
+                await order.updateOne({$unset:{orderDetails_id:1}})
+                next()
+            } else {
+                next()
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
     async getService(req,res) {
         try {
             const serviceId = req.params.serviceId

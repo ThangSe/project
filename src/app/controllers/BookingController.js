@@ -180,7 +180,8 @@ class BookingController {
              const acc_id = accountInfo.id
              const booking = await Booking.findOne({_id: bookingId, acc_id: acc_id}).populate([{
                 path: 'order_id',
-                model: 'order'
+                model: 'order',
+                select: 'id'
              }])
              res.status(200).json(booking)
         } catch (err) {
