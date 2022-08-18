@@ -213,17 +213,23 @@ class AccountController {
                 })
             const upload = multer({storage}).single('img')
              upload(req, res, async(err) => {
-                if(err) {
-                    res.json(err)
+                if(err instanceof multer.MulterError) {
+                    res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
+                    return
+                } else if(err) {
+                    if(err.name == 'ExtensionError') {
+                        res.status(413).json({ error: { message: err.message } }).end()
+                    } else {
+                        res.status(500).json({ error: { message: `unknown uploading error: ${err.message}` } }).end()
+                    }
+                    return
                 }
-                else {
-                    const token = req.headers.token
-                    const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-                    const acc_id = accountInfo.id
-                    const URL = "https://computer-services-api.herokuapp.com/account/avatar/"+req.file.filename
-                    await User.findOneAndUpdate({acc_id: acc_id}, {imgURL: URL})
-                    res.json({file: req.file})
-                }
+                const token = req.headers.token
+                const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+                const acc_id = accountInfo.id
+                const URL = "https://computer-services-api.herokuapp.com/account/avatar/"+req.file.filename
+                await User.findOneAndUpdate({acc_id: acc_id}, {imgURL: URL})
+                res.status(200).json('Upload success')
             })    
         } catch (err) {
             res.status(500).json(err)

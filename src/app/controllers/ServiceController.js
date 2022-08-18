@@ -70,7 +70,29 @@ class ServiceController {
             res.status(500).json(err)
         }
     }
-    
+    async addMoreAccessoriesToService(req, res) {
+        try {
+            const serId = req.params.serviceId
+            const data  = req.body
+            for(const d of data.accessories) {
+                const existedBridge = await ServiceAccessory.find({service_id: serId, accessory_id: d.accessory_id})
+                if(!existedBridge) {
+                    const serviceAccessory = new ServiceAccessory({
+                        typeCom: d.typeCom,
+                        brandCom: d.brandCom,
+                        service_id: saveService.id,
+                        accessory_id: d.accessory_id
+                    })
+                    await serviceAccessory.save()
+                    await Service.findByIdAndUpdate({_id: serId},{$push: {serHasAcc: serviceAccessory.id}})
+                    await Accessory.findByIdAndUpdate({_id: d.accessory_id}, {$push: {serHasAcc: serviceAccessory.id}})
+                }
+            }
+            res.status(200).json("Cap nhat thanh cong")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
  
 }
 

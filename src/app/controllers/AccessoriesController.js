@@ -1,4 +1,5 @@
 const Accessory = require('../models/Accessory')
+const ServiceAccessory = require('../models/ServiceAccessory')
 const Supplier = require('../models/Supplier')
 const mongoose = require('mongoose')
 const multer = require('multer')
@@ -25,17 +26,45 @@ class AccessoriesController {
          })
          .catch(next)
     }
+    async showAllAccessoryByType(req, res) {
+        try {
+            const type = req.body.type
+            const serId = req.body.serviceId
+            const existedBridge = await ServiceAccessory.find({typeCom: type, _id: serId})
+            if(existedBridge){
+                const existedAccId = []
+                for(e of existedBridge) {
+                    existedAccId.push(accessory_id)
+                }
+                const accessories = await Accessory.find().where('_id').nin(existedAccId).populate({
+                    path: 'supplier_id',
+                    model: 'supplier',
+                    select: 'name'
+                })
+                res.status(200).json(accessories)
+            } else {
+                const accessories = await Accessory.find({type: type}).populate({
+                    path: 'supplier_id',
+                    model: 'supplier',
+                    select: 'name'
+                })
+                res.status(200).json(accessories)
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
 
-    //POST /accessory/create
+    //POST /accessory/
     async createNewAccessory(req, res) {
         try {
-            accName = req.body.name
-            const existedAccessory = await Accessory.findOne({name: accName})
+            const name = req.body.name
+            const existedAccessory = await Accessory.findOne({name: name})
             if(existedAccessory) {
                 res.status(404).json("Accessory is existed")
             }
             else {
-                const accessory = new Accessory(body)
+                const accessory = new Accessory(req.body)
                 const saveAccessory = await accessory.save()
                 if(req.body.supplier_id) {
                 const filter = {_id: req.body.supplier_id}
@@ -43,7 +72,8 @@ class AccessoriesController {
                 await Supplier.findOneAndUpdate(filter, update, {
                     new: true
                 }) 
-                }                      
+                }
+                res.status(200).json(saveAccessory)                
             }
         } catch (err) {
             res.status(500).json(err)
@@ -82,7 +112,7 @@ class AccessoriesController {
                     }
                 }
             }).array('uploadedImages', 10)
-             upload(req, res, (err) => {
+            upload(req, res, (err) => {
                 if(err instanceof multer.MulterError) {
                     res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
                     return

@@ -155,6 +155,7 @@ class OrderController {
                 const listAccId = data.accessories
                 const serId = data.serviceId
                 var priceAcc = 0
+                var message
                 if(hasAccessory) {
                     const orderDetail = new OrderDetail({
                         discount,
@@ -163,9 +164,14 @@ class OrderController {
                     })
                     const saveOrderDetail = await orderDetail.save()
                     listAccId.forEach(async function(e){
-                        const accessory = await Accessory.findById(e.accessory_id)
-                        priceAcc+=(accessory.price*e.amount_acc)
-                        await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                        if(e.accessory_id) {
+                            const accessory = await Accessory.findById(e.accessory_id)
+                            priceAcc+=(accessory.price*e.amount_acc)
+                            await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                        }
+                        else {
+                            message = "Error1"
+                        }
                     })
                     const service = await Service.findById(serId)
                     await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
@@ -193,8 +199,8 @@ class OrderController {
                         {new: true}
                     )
                 }
+                res.status(200).json(message)  
             }
-            res.status(200).json("Thêm mới thành công")  
         } catch (err) {
             res.status(500).json(err)
         }
@@ -212,7 +218,7 @@ class OrderController {
                     }
                     await Accessory.updateMany({_id:{$in: accessories_id}}, {$pull: {orderdetail_id: orderDetailId}})
                     await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
-                    await OrderDetail.remove({_id: orderDetailId})
+                    await OrderDetail.deleteOne({_id: orderDetailId})
                 }
                 await order.updateOne({$unset:{orderDetails_id:1}})
                 next()
