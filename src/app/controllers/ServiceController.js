@@ -26,6 +26,7 @@ class ServiceController {
                     description: data.description,
                     type: data.type,
                     price: data.price,
+                    brand: data.brand,
                     hasAccessory: data.hasAccessory
                 })
                 const saveService = await service.save()
@@ -33,7 +34,6 @@ class ServiceController {
                     for(const d of data.accessories) {
                         const serviceAccessory = new ServiceAccessory({
                             typeCom: d.typeCom,
-                            brandCom: d.brandCom,
                             service_id: saveService.id,
                             accessory_id: d.accessory_id
                         })
@@ -79,7 +79,6 @@ class ServiceController {
                 if(!existedBridge) {
                     const serviceAccessory = new ServiceAccessory({
                         typeCom: d.typeCom,
-                        brandCom: d.brandCom,
                         service_id: saveService.id,
                         accessory_id: d.accessory_id
                     })
@@ -101,7 +100,7 @@ class ServiceController {
                 {
                     path: 'serHasAcc',
                     model: 'serviceaccessory',
-                    select: 'accessory_id brandCom',
+                    select: 'accessory_id',
                     populate: {
                         path: 'accessory_id',
                         model: 'accessory',

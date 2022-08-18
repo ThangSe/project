@@ -83,7 +83,6 @@ class AccessoriesController {
 
     async updateImgAccessories(req, res) {
         try {
-            const AccessoryId = req.params.id
             const storage = new GridFsStorage({
                 url: process.env.DB_CONNECTION,
                 file: (req, file) => {
@@ -126,6 +125,9 @@ class AccessoriesController {
                     }
                     return
                 }
+                const AccessoryId = req.params.id
+                const URL = "https://computer-services-api.herokuapp.com/accessory-img/"+req.file.filename
+                await Accessory.findByIdAndUpdate({_id: AccessoryId}, {imgURL: URL})
                 res.status(200).json('Upload success')   
             })    
         } catch (err) {

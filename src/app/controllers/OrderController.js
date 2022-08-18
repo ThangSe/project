@@ -11,17 +11,12 @@ class OrderController {
     async showAllServiceToChoose(req, res) {    
         try {
             const typeCom = req.query.typeCom
-            const brandCom = req.query.brandCom
             const typeSer = req.query.typeSer
             const hasAccessory = Boolean((req.query.hasAccessory || "").replace(/\s*(false|null|undefined|0)\s*/i, ""))
             if(hasAccessory) {
                 var serviceAndAccessory
-                if(typeCom && brandCom) {
-                    serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom, brandCom: brandCom}, 'service_id')
-                }else if(typeCom) {
+                if(typeCom) {
                     serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom}, 'service_id')
-                }else if(brandCom) {
-                    serviceAndAccessory = await ServiceAccessory.find({brandCom: brandCom}, 'service_id')
                 }else {
                     serviceAndAccessory = await ServiceAccessory.find({}, 'service_id')
                 }
