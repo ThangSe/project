@@ -182,7 +182,7 @@ class BookingController {
                 path: 'order_id',
                 model: 'order'
              }])
-             res.stauts(200).json(booking)
+             res.status(200).json(booking)
         } catch (err) {
             res.status(500).json(err)
         }
