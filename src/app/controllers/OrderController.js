@@ -83,11 +83,16 @@ class OrderController {
                 {
                     path: 'orderDetails_id',
                     model: 'orderdetail',
-                    select: 'amout_ser price_after discount service_id',
+                    select: 'amount_ser price_after discount service_id accessories',
                     populate: {
                         path: 'service_id',
                         model: 'service',
-                        select: 'name'
+                        select: 'name price'
+                    },
+                    populate: {
+                        path: 'accessories.accessory_id',
+                        model: 'accessory',
+                        select: 'name price insurance'
                     }
                 }
             ])
