@@ -10,6 +10,7 @@ const Accessory = new Schema({
     component: {type: String},
     description: {type: String, required: true},
     insurance: {type: String, required: true},
+    imgURL: {type: String},
     supplier_id: {type: mongoose.Schema.Types.ObjectId, ref:"supplier"},
     orderdetail_id: [
         {type: mongoose.Schema.Types.ObjectId, ref:"orderdetail"}

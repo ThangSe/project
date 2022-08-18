@@ -34,12 +34,7 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(cookieParser())
 app.use(morgan('common'))
-app.use(express.json())
-app.use(
-    express.urlencoded({
-        extended: true,
-    }),
-)
+app.use(bodyParser.urlencoded({ extended: true }));
 
 const PORT = process.env.PORT || 2000
 

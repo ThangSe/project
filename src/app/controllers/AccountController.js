@@ -220,7 +220,8 @@ class AccountController {
                     const token = req.headers.token
                     const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
                     const acc_id = accountInfo.id
-                    await User.findOneAndUpdate({acc_id: acc_id}, {img: req.file.filename})
+                    const URL = "https://computer-services-api.herokuapp.com/account/avatar/"+req.file.filename
+                    await User.findOneAndUpdate({acc_id: acc_id}, {imgURL: URL})
                     res.json({file: req.file})
                 }
             })    
@@ -242,7 +243,7 @@ class AccountController {
                 if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
                   // Read output to browser
                   const readstream = gridfsBucket.openDownloadStream(file._id);
-                    readstream.pipe(res)
+                  readstream.pipe(res)
                 } else {
                   res.status(404).json({
                     err: 'Not an image'
