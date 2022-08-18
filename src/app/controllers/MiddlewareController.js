@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken")
 
 const middlewareController = {
     //vertify Tokenization
+    
     verifyToken: (req, res, next) => {
         const token = req.headers.token
         if(token) {

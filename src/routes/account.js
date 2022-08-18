@@ -8,8 +8,8 @@ router.get("/all-staff", middlewareController.verifyTokenManager, accountControl
 router.get("/all-manager", middlewareController.verifyTokenManager, accountController.getAllManagerAccount)
 router.get("/account-detail", middlewareController.verifyTokenManager, accountController.getAllAccountsDetail)
 router.get("/view-profile", middlewareController.verifyToken, accountController.viewOwnedProfile)
+router.get("/avatar/:filename", accountController.getAvatar)
 router.get("/view-booking-history", middlewareController.verifyToken, accountController.viewBookingHistory)
-router.get("/:username", middlewareController.verifyTokenManager, accountController.getAccountByUsername)
 router.get("/all/lastest-account", middlewareController.verifyTokenManager, accountController.showLastestAccount)
 router.get("/byId/:id", middlewareController.verifyTokenManager, accountController.getAccountById)
 router.patch('/change-password', middlewareController.verifyToken, accountController.updateAccountById)
@@ -17,5 +17,6 @@ router.patch("/editprofile", middlewareController.verifyToken, accountController
 router.post("/register-staff", accountController.registerAccountStaff)
 router.post("/editimgprofile",/* middlewareController.verifyToken,*/ accountController.updateImgProfileAccount)
 router.patch("/:id/restore", middlewareController.verifyTokenManager,  accountController.restoreAccount)
+router.get("/:username", middlewareController.verifyTokenManager, accountController.getAccountByUsername)
 router.delete("/:id", middlewareController.verifyTokenManager, accountController.deleteAccount)
 module.exports = router

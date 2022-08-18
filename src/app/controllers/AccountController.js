@@ -10,7 +10,18 @@ const Grid = require('gridfs-stream')
 const crypto = require('crypto')
 const path = require('path')
 
+const conn = mongoose.createConnection(process.env.DB_CONNECTION)
+let gfs, gridfsBucket
+conn.once('open', () => {
+    gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
+        bucketName: 'uploads'
+      })
+    gfs = Grid(conn.db, mongoose.mongo)
+    gfs.collection('uploads')
+})
+
 class AccountController {
+    
     //Register manager accounts
     //POST /account/register
     async registerAccountStaff(req, res) {
@@ -172,7 +183,7 @@ class AccountController {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
-            const user = User.findOne({acc_id: acc_id})
+            const user = await User.findOne({acc_id: acc_id})
             await user.updateOne({$set: req.body})
             res.status(200).json("Cập nhật trang cá nhân thành công")
         } catch (err) {
@@ -182,38 +193,34 @@ class AccountController {
     //PATCH /account/editimgprofile (customer)
     async updateImgProfileAccount(req, res) {
         try {
-            const conn = mongoose.createConnection(process.env.DB_CONNECTION)
-            let gfs
-            conn.once('open', () => {
-            gfs = Grid(conn.db, mongoose.mongo)
-            gfs.collection('uploads')
-            })
-
             const storage = new GridFsStorage({
-            url: process.env.DB_CONNECTION,
-            file: (req, file) => {
-                return new Promise((resolve, reject) => {
-                crypto.randomBytes(16, (err, buf) => {
-                    if(err) {
-                    return reject(err)
-                    }
-                    const filename = buf.toString('hex') + path.extname(file.originalname)
-                    const fileInfo = {
-                    filename: filename,
-                    bucketName: 'uploads'
-                    }
-                    resolve(fileInfo)
+                url: process.env.DB_CONNECTION,
+                file: (req, file) => {
+                    return new Promise((resolve, reject) => {
+                    crypto.randomBytes(16, (err, buf) => {
+                        if(err) {
+                        return reject(err)
+                        }
+                        const filename = buf.toString('hex') + path.extname(file.originalname)
+                        const fileInfo = {
+                        filename: filename,
+                        bucketName: 'uploads'
+                        }
+                        resolve(fileInfo)
+                    })
+                    })
+                }
                 })
-                })
-            }
-            })
             const upload = multer({storage}).single('img')
-            upload(req, res, (err) => {
+             upload(req, res, async(err) => {
                 if(err) {
                     res.json(err)
                 }
                 else {
-                    console.log("q")
+                    const token = req.headers.token
+                    const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+                    const acc_id = accountInfo.id
+                    await User.findOneAndUpdate({acc_id: acc_id}, {img: req.file.filename})
                     res.json({file: req.file})
                 }
             })    
@@ -221,6 +228,32 @@ class AccountController {
             res.status(500).json(err)
         }
     }
+    async getAvatar(req, res) {
+        try {
+            const file = await gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+                // Check if file
+                if (!file || file.length === 0) {
+                  return res.status(404).json({
+                    err: 'No file exists'
+                  });
+                }
+                
+                // Check if image
+                if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
+                  // Read output to browser
+                  const readstream = gridfsBucket.openDownloadStream(file._id);
+                    readstream.pipe(res)
+                } else {
+                  res.status(404).json({
+                    err: 'Not an image'
+                  })
+                 }
+                })
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     //GET /account/view-booking-history (customer)
     async viewBookingHistory(req, res) {
         try {
