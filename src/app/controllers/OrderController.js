@@ -310,8 +310,13 @@ class OrderController {
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
             const workSlot = await WorkSlot.findOne({staff_id: acc_id, order_id: orderId})
-            const order = await Order.findOne({work_slot: workSlot.id})
-            res.status(200).json(order)
+            if(workSlot){
+                const order = await Order.findById(orderId)
+                res.status(200).json(order)
+            }
+            else {
+                res.status(200).json("Khong tim thay order")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
