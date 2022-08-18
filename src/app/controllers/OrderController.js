@@ -84,16 +84,17 @@ class OrderController {
                     path: 'orderDetails_id',
                     model: 'orderdetail',
                     select: 'amount_ser price_after discount service_id accessories',
-                    populate: {
+                    populate: [{
                         path: 'service_id',
                         model: 'service',
                         select: 'name price'
                     },
-                    populate: {
+                    {
                         path: 'accessories.accessory_id',
                         model: 'accessory',
                         select: 'name price insurance'
                     }
+                    ]
                 }
             ])
             res.status(200).json(order)
