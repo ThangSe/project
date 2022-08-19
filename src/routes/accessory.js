@@ -8,7 +8,7 @@ router.get("/all-accessories-by-type", middlewareController.verifyToken, accesso
 router.get("/accessory-img/:filename", accessoriesController.getImg)
 router.post("/new-accessory", middlewareController.verifyTokenManager, accessoriesController.createNewAccessory)
 router.post("/new-supplier", middlewareController.verifyTokenManager, accessoriesController.createSupplier)
-router.get("/:id", middlewareController.verifyTokenStaff, accessoriesController.getAccessory)
-router.patch("/:id", middlewareController.verifyTokenManager, accessoriesController.updateAccessory)
 router.post("/upload-img/:id", middlewareController.verifyTokenManager, accessoriesController.deleteImgAccessories, accessoriesController.updateImgAccessories)
+router.get("/detail-accessory/:id", middlewareController.verifyTokenStaff, accessoriesController.getAccessory)
+router.patch("/upadated-accessory/:id", middlewareController.verifyTokenManager, accessoriesController.updateAccessory)
 module.exports = router
