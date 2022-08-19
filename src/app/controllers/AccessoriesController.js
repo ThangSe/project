@@ -5,8 +5,6 @@ const mongoose = require('mongoose')
 const multer = require('multer')
 const {GridFsStorage} = require('multer-gridfs-storage')
 const Grid = require('gridfs-stream')
-const crypto = require('crypto')
-const path = require('path')
 const conn = mongoose.createConnection(process.env.DB_CONNECTION)
 let gfs, gridfsBucket
 conn.once('open', () => {
@@ -87,9 +85,6 @@ class AccessoriesController {
                 url: process.env.DB_CONNECTION,
                 file: (req, file) => {
                     return new Promise((resolve, reject) => {
-                        if(err) {
-                        return reject(err)
-                        }
                         const filename = Date.now() + '-' + file.originalname
                         const fileInfo = {
                         filename: filename,
@@ -112,7 +107,7 @@ class AccessoriesController {
                         return cb(err)
                     }
                 }
-            }).array('uploadedImages', 10)
+            }).single('img')
             upload(req, res, async(err) => {
                 if(err instanceof multer.MulterError) {
                     res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
@@ -127,7 +122,7 @@ class AccessoriesController {
                 }
                 const AccessoryId = req.params.id
                 const URL = "https://computer-services-api.herokuapp.com/accessory-img/"+req.file.filename
-                await Accessory.findByIdAndUpdate({_id: AccessoryId}, {imgURL: URL})
+                await Accessory.findByIdAndUpdate({_id: AccessoryId}, {$set: {imgURL: URL}})
                 res.status(200).json('Upload success')   
             })    
         } catch (err) {

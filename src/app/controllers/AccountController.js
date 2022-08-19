@@ -193,26 +193,43 @@ class AccountController {
     //PATCH /account/editimgprofile (customer)
     async updateImgProfileAccount(req, res) {
         try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const user = await User.findOne({acc_id:acc_id})  
             const storage = new GridFsStorage({
                 url: process.env.DB_CONNECTION,
                 file: (req, file) => {
                     return new Promise((resolve, reject) => {
-                    crypto.randomBytes(16, (err, buf) => {
-                        if(err) {
-                        return reject(err)
-                        }
-                        const filename = buf.toString('hex') + path.extname(file.originalname)
-                        const fileInfo = {
-                        filename: filename,
-                        bucketName: 'uploads'
-                        }
-                        resolve(fileInfo)
-                    })
+                        crypto.randomBytes(16, (err, buf) => {
+                            if(err) {
+                            return reject(err)
+                            }
+                            const filename = buf.toString('hex') + path.extname(file.originalname)
+                            const fileInfo = {
+                            filename: filename,
+                            bucketName: 'uploads'
+                            }
+                            resolve(fileInfo)
+                        })
                     })
                 }
                 })
-            const upload = multer({storage}).single('img')
-             upload(req, res, async(err) => {
+            const upload = multer({
+                storage,
+                limits: {fileSize: 1 * 1024 * 1024 },
+                fileFilter: (req, file, cb) => {
+                    if(file.mimetype == "image/png" || file.mimetype == "image/jpeg" || file.mimetype == "image/jpg"){
+                        cb(null, true)
+                    }else {
+                        cb(null, false)
+                        const err = new Error('Only .png, .jpg and .jpeg format allowed')
+                        err.name = 'ExtensionError'
+                        return cb(err)
+                    }
+                }
+            }).single('img')
+            upload(req, res, async(err) => {
                 if(err instanceof multer.MulterError) {
                     res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
                     return
@@ -224,20 +241,17 @@ class AccountController {
                     }
                     return
                 }
-                const token = req.headers.token
-                const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
-                const acc_id = accountInfo.id
                 const URL = "https://computer-services-api.herokuapp.com/account/avatar/"+req.file.filename
-                await User.findOneAndUpdate({acc_id: acc_id}, {imgURL: URL})
-                res.status(200).json('Upload success')
-            })    
+                await user.updateOne({$set: {imgURL: URL}})
+                res.status(200).json('Upload success') 
+            })                 
         } catch (err) {
             res.status(500).json(err)
         }
     }
     async getAvatar(req, res) {
         try {
-            const file = await gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
+            await gfs.files.findOne({ filename: req.params.filename } , (err, file) => {
                 // Check if file
                 if (!file || file.length === 0) {
                   return res.status(404).json({
