@@ -132,7 +132,7 @@ class AccessoriesController {
 
     async getImg(req, res) {
         try {
-            const file = await gfs.file.findOne({ filename: req.params.filename }, (err, file) => {
+            await gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
                 // Check if file
                 if (!file || file.length === 0) {
                   return res.status(404).json({
