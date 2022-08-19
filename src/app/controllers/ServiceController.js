@@ -94,7 +94,6 @@ class ServiceController {
                 }
                 res.status(200).json("Cap nhat thanh cong")                  
             } else {
-                console.log("here")
                 await service.updateOne(data)
                 res.status(200).json("Cap nhat thanh cong")
             }
