@@ -58,18 +58,51 @@ class ServiceController {
                 for(const bridgeId of service.serHasAcc) {
                     const bridge = await ServiceAccessory.findfindById(bridgeId)
                     await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
-                    await Service.deleteOne({_id: bridge.service_id})
                     await ServiceAccessory.deleteOne({_id: bridgeId})
+                    await service.updateOne({$pull: {serHasAcc: bridge.id}})
                 }
                 next()
             } else {
-                await Service.deleteOne({_id: req.params.id})
                 next()
             }
         } catch (err) {
             res.status(500).json(err)
         }
     }
+    async updateNewDetailService(req, res) {
+        try {
+            const serId = req.params.id
+            const data = req.body
+            const service = await Service.findById(serId)
+            if(service.hasAccessory) {
+                await service.updateOne({
+                    name: data.name,
+                    description: data.description,
+                    type: data.type,
+                    price: data.price,
+                    brand: data.brand
+                })
+                for(const d of data.accessories) {
+                    const serviceAccessory = new ServiceAccessory({
+                        typeCom: d.typeCom,
+                        service_id: saveService.id,
+                        accessory_id: d.accessory_id
+                    })
+                    await serviceAccessory.save()
+                    await service.updateOne({$push: {serHasAcc: serviceAccessory.id}}, {new: true})
+                    await Accessory.findByIdAndUpdate({_id: d.accessory_id}, {$push: {serHasAcc: serviceAccessory.id}})
+                }
+                res.status(200).json("Cap nhat thanh cong")                  
+            } else {
+                console.log("here")
+                await service.updateOne(data)
+                res.status(200).json("Cap nhat thanh cong")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async getService(req,res) {
         try {
             const serviceId = req.params.serviceId

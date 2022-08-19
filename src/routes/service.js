@@ -4,7 +4,7 @@ const router = require("express").Router()
 
 router.get("/all-service", middlewareController.verifyToken, serviceController.showAllService)
 router.get("/all-accessories-service/:serviceId", serviceController.showAllAccessoriesOfSerive)
-router.post("/update-service/:id", middlewareController.verifyTokenManager,serviceController.deleteAllDetailService, serviceController.createNewService)
+router.post("/update-service/:id", middlewareController.verifyTokenManager,serviceController.deleteAllDetailService, serviceController.updateNewDetailService)
 router.post("/new-service", middlewareController.verifyTokenManager, serviceController.createNewService)
 router.get("/accessories-to-service/:serviceId", middlewareController.verifyTokenManager ,serviceController.addMoreAccessoriesToService)
 router.get("/:serviceId", middlewareController.verifyTokenStaff, serviceController.getService)
