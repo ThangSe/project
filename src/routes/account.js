@@ -15,8 +15,9 @@ router.get("/byId/:id", middlewareController.verifyTokenManager, accountControll
 router.patch('/change-password', middlewareController.verifyToken, accountController.updateAccountById)
 router.patch("/editprofile", middlewareController.verifyToken, accountController.updateProfileAccount)
 router.post("/register-staff", accountController.registerAccountStaff)
-router.post("/editimgprofile",/* middlewareController.verifyToken,*/ accountController.updateImgProfileAccount)
+router.post("/editimgprofile",middlewareController.verifyToken,accountController.deleteImgProfileAccount, accountController.updateImgProfileAccount)
 router.patch("/:id/restore", middlewareController.verifyTokenManager,  accountController.restoreAccount)
 router.get("/:username", middlewareController.verifyTokenManager, accountController.getAccountByUsername)
 router.delete("/:id", middlewareController.verifyTokenManager, accountController.deleteAccount)
+router.get("/test/:id", accountController.deleteImgProfileAccount)
 module.exports = router

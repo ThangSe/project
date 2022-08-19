@@ -191,16 +191,18 @@ class AccountController {
         }
     }
     //PATCH /account/editimgprofile (customer)
-    async deleteImgProfileAccount(req, res) {
+    async deleteImgProfileAccount(req, res, next) {
         try {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
             const user = await User.findOne({acc_id:acc_id})
-            if(user.imgUrl){
-                res.status(200).json("not empty")
+            if(user.imgURL){
+                const filename = user.imgURL.replace("https://computer-services-api.herokuapp.com/account/avatar/","")
+                await gfs.files.deleteOne({filename: filename})
+                next()
             }else {
-                res.status(200).json("empty")
+                next()
             }
         } catch (err) {
             res.status(500).json(err)

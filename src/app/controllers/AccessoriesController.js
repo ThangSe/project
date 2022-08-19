@@ -79,6 +79,22 @@ class AccessoriesController {
         }  
     }
 
+    async deleteImgAccessories(req, res, next) {
+        try {
+            const accessoryId = req.params.id
+            const accessory = await Accessory.findById(accessoryId)
+            if(accessory.imgURL){
+                const filename = accessory.imgURL.replace("https://computer-services-api.herokuapp.com/accessory/accessory-img/","")
+                await gfs.files.deleteOne({filename: filename})
+                next()
+            }else {
+                next()
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async updateImgAccessories(req, res) {
         try {
             const storage = new GridFsStorage({
