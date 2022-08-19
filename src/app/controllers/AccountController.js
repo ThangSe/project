@@ -191,6 +191,22 @@ class AccountController {
         }
     }
     //PATCH /account/editimgprofile (customer)
+    async deleteImgProfileAccount(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const user = await User.findOne({acc_id:acc_id})
+            if(user.imgUrl){
+                res.status(200).json("not empty")
+            }else {
+                res.status(200).json("empty")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async updateImgProfileAccount(req, res) {
         try {
             const token = req.headers.token

@@ -121,7 +121,7 @@ class AccessoriesController {
                     return
                 }
                 const AccessoryId = req.params.id
-                const URL = "https://computer-services-api.herokuapp.com/accessory-img/"+req.file.filename
+                const URL = "https://computer-services-api.herokuapp.com/accessory/accessory-img/"+req.file.filename
                 await Accessory.findByIdAndUpdate({_id: AccessoryId}, {$set: {imgURL: URL}})
                 res.status(200).json('Upload success')   
             })    
