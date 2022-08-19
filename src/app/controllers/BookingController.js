@@ -155,7 +155,7 @@ class BookingController {
         const token = req.headers.token
         const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
         const acc_id = accountInfo.id
-        Booking.find({acc_id: acc_id})
+        Booking.find({acc_id: acc_id}).sort({_id:-1})
             .then(bookings => {
                 res.json(bookings)
             })

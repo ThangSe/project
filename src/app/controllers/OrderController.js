@@ -394,24 +394,17 @@ class OrderController {
                 {
                     path: 'accessories.accessory_id',
                     model: 'accessory',
-                    select: 'name description insurance price service_id supplier_id',
-                    populate:[
-                        {
-                            path: 'service_id',
-                            model: 'service',
-                            select: 'name description type price hasAccessory'
-                        },
-                        {
+                    select: 'name description insurance price supplier_id',
+                    populate:{
                             path: 'supplier_id',
                             model: 'supplier',
                             select: 'name'
-                        }
-                    ]
+                    }
                 }
             ]
         }])
             .then(order => {
-                res.json(order)
+                res.status(200).json(order)
             })
             .catch(next)
     }
