@@ -56,7 +56,7 @@ class ServiceController {
             const service = await Service.findById(req.params.id)
             if(service.serHasAcc.lengh>0){
                 for(const bridgeId of service.serHasAcc) {
-                    const bridge = await ServiceAccessory.findfindById(bridgeId)
+                    const bridge = await ServiceAccessory.findById(bridgeId)
                     await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
                     await ServiceAccessory.deleteOne({_id: bridgeId})
                     await service.updateOne({$pull: {serHasAcc: bridge.id}})
