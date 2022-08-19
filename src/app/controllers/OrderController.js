@@ -392,7 +392,7 @@ class OrderController {
                     select: 'name description type price hasAccessory'
                 },
                 {
-                    path: 'accessory_id',
+                    path: 'accessories.accessory_id',
                     model: 'accessory',
                     select: 'name description insurance price service_id supplier_id',
                     populate:[
