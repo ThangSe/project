@@ -10,5 +10,5 @@ router.post("/new-accessory",/* middlewareController.verifyTokenManager,*/ acces
 router.post("/new-supplier", middlewareController.verifyTokenManager, accessoriesController.createSupplier)
 router.get("/:id", middlewareController.verifyTokenStaff, accessoriesController.getAccessory)
 router.patch("/:id", middlewareController.verifyTokenManager, accessoriesController.updateAccessory)
-router.post("/upload-img", accessoriesController.updateImgAccessories)
+router.post("/upload-img/:id", accessoriesController.updateImgAccessories)
 module.exports = router
