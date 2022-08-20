@@ -92,7 +92,7 @@ class BookingController {
     async showAllBookingWithOrderInfo (req, res) {
         try {
             const {page = 1, limit = 10, sort, cus_name, status} = req.query
-            let bookings = await Booking.find().limit(limit * 1).skip((page - 1) * limit).populate([
+            let bookings = await Booking.find().sort({_id:1}).limit(limit * 1).skip((page - 1) * limit).populate([
                 {
                     path: 'order_id',
                     model: 'order',
@@ -171,7 +171,18 @@ class BookingController {
                 }      
             }
             else {
-                return res.status(200).json({count: Math.ceil(count), bookings})
+                if(sort == "desc") {
+                    bookings = await Booking.find().sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                        {
+                            path: 'order_id',
+                            model: 'order',
+                            select: 'status'
+                        }
+                    ])
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }else {
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }
             }
 
         } catch (err) {
