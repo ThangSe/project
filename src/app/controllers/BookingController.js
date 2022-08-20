@@ -5,32 +5,28 @@ const Buffer = require('buffer/').Buffer
 class BookingController {
     async showAll (req, res) {
         try {
-            const {page = 1, limit = 10} = req.query
-            const sort = req.query.sort
+            const {page = 1, limit = 10, sort, status} = req.query
             let bookings = await Booking.find().limit(limit * 1).skip((page - 1) * limit)
             let count = await Booking.find().count()/10
-            if(sort == "desc" && !req.query.status) {
-                bookings = await Booking.find().sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit)
-                return res.status(200).json({count: Math.ceil(count), bookings})
-            }
-            else if(req.query.status) {
-                var flag = 1
+            if(status) {
                 if(sort == "desc") {
-                    flag = -1
-                    bookings = await Booking.find({status:req.query.status}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit)
-                    count = await Booking.find({status:req.query.status}).count()/10
+                    bookings = await Booking.find({status: status}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit)
+                    count = await Booking.find({status: status}).count()/10
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }else {
+                    bookings = await Booking.find({status: status}).sort({_id: 1}).limit(limit * 1).skip((page - 1) * limit)
+                    count = await Booking.find({status: status}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }
-                else {
-                    bookings = await Booking.find({status:req.query.status}).sort({_id: flag}).limit(limit * 1).skip((page - 1) * limit)
-                    count = await Booking.find({status:req.query.status}).count()/10
+            }else {
+                if(sort == "desc") {
+                    bookings = await Booking.find().sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit)
                     return res.status(200).json({count: Math.ceil(count), bookings})
-                }      
+                }else {
+                    bookings = await Booking.find().sort({_id: 1}).limit(limit * 1).skip((page - 1) * limit)
+                    return res.status(200).json({count: Math.ceil(count), bookings})
+                }   
             }
-            else {
-                return res.status(200).json({count: Math.ceil(count), bookings})
-            }
-
         } catch (err) {
             res.status(500).json(err)
         }
