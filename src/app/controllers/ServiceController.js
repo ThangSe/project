@@ -49,9 +49,9 @@ class ServiceController {
         } catch (err) {
             if(err.name == "ValidationError") {
                 for(const error in err.errors){
-                    console.log(error, error.message)
+                    console.log(error)
                 }
-                res.status(500).json("OK")
+                res.status(500).json(err)
             } else {
                 res.status(500).json(err)
             }
@@ -61,12 +61,12 @@ class ServiceController {
     async deleteAllDetailService(req, res, next) {
         try {
             const service = await Service.findById(req.params.id)
-            if(service.serHasAcc.lengh>0){
+            if(service.serHasAcc){
                 for(const bridgeId of service.serHasAcc) {
                     const bridge = await ServiceAccessory.findById(bridgeId)
                     await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
+                    await Service.findByIdAndUpdate({_id: service.id}, {$pull: {serHasAcc: bridgeId}})
                     await ServiceAccessory.deleteOne({_id: bridgeId})
-                    await service.updateOne({$pull: {serHasAcc: bridge.id}})
                 }
                 next()
             } else {
@@ -99,10 +99,10 @@ class ServiceController {
                     await service.updateOne({$push: {serHasAcc: serviceAccessory.id}}, {new: true})
                     await Accessory.findByIdAndUpdate({_id: d.accessory_id}, {$push: {serHasAcc: serviceAccessory.id}})
                 }
-                res.status(200).json("Cap nhat thanh cong")                  
+                res.status(200).json("Cập nhật thành công")                  
             } else {
                 await service.updateOne(data)
-                res.status(200).json("Cap nhat thanh cong")
+                res.status(200).json("Cập nhật thành công")
             }
         } catch (err) {
             res.status(500).json(err)
