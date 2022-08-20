@@ -162,8 +162,13 @@ class ScheduleController {
         try {
             const workSlotId = req.body.workSlotId
             const orderId = req.body.orderId
-            await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-            await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
+            const order = await Order.findById(orderId)
+            if(order.work_slot || order.status != "Đang chờ") {
+                res.status(400).json("Đơn hàng này đã có nhân viên đang làm việc")
+            } else {
+                await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
+                await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
+            }
             res.status(200).json("Cử nhân viên thành công")
         } catch (err) {
             res.status(500).json(err)
