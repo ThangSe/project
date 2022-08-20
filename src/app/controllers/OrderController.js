@@ -200,9 +200,13 @@ class OrderController {
                 }
             }
             await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-            res.status(200).json("Cap nhat thanh cong")  
+            res.status(200).json("Cập nhật thành công")  
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
 
@@ -423,7 +427,11 @@ class OrderController {
             await order.updateOne({$set: req.body})
             next()
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
     async addComputerToOrderById(req, res) {
@@ -442,7 +450,11 @@ class OrderController {
             }
             res.status(200).json("Cập nhật thành công")
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
     async acceptOrder(req, res) {

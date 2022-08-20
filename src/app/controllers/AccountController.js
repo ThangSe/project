@@ -162,7 +162,11 @@ class AccountController {
                 res.status(200).json("Cập nhật thành công")
             }    
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
     //GET /account/view-profile (customer)
@@ -187,7 +191,11 @@ class AccountController {
             await user.updateOne({$set: req.body})
             res.status(200).json("Cập nhật trang cá nhân thành công")
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
     //PATCH /account/editimgprofile (customer)

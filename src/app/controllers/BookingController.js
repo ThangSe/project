@@ -238,7 +238,11 @@ class BookingController {
             await Account.findByIdAndUpdate({_id: acc_id}, {$push: {booking: saveBooking.id}})
             res.status(200).json(finalBooking)
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
         
     }
@@ -258,7 +262,11 @@ class BookingController {
              await booking.updateOne({$set: {order_id: saveOrder.id}})
              res.status(200).json(neworder)
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
         
     }
@@ -277,7 +285,11 @@ class BookingController {
                 res.status(200).json("Cập nhật lịch hẹn thành công")
             }
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
 
@@ -292,7 +304,11 @@ class BookingController {
             const updateBooking = await Booking.findByIdAndUpdate(filter, update, {new: true})
             res.status(200).json(updateBooking)
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
     

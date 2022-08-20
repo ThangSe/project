@@ -4,8 +4,8 @@ const mongooseDelete = require('mongoose-delete')
 const Schema = mongoose.Schema
 
 const Account = new Schema({
-    username: {type: String, required: true, unique: true},
-    password: {type: String, required: true},
+    username: {type: String, required: [true, 'Bạn phải nhập tài khoản'], unique: true},
+    password: {type: String, required: [true, 'Bạn phải nhập mật khẩu']},
     status: {type: String, required: true, default: 'offline'},
     role: {type: String, required: true, default: 'customer'},
     refreshToken: {type: String},

@@ -47,11 +47,8 @@ class ServiceController {
                 }
             } 
         } catch (err) {
-            if(err.name == "ValidationError") {
-                for(const error in err.errors){
-                    console.log(error)
-                }
-                res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
             } else {
                 res.status(500).json(err)
             }
@@ -105,7 +102,11 @@ class ServiceController {
                 res.status(200).json("Cập nhật thành công")
             }
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
 

@@ -4,12 +4,12 @@ const mongooseDelete = require('mongoose-delete')
 const Schema = mongoose.Schema
 
 const Accessory = new Schema({
-    name: {type: String, required: true},
-    price: {type: Number},
-    type: {type: String}, // loai may tinh
-    component: {type: String}, //loai phu tung
-    description: {type: String, required: true},
-    insurance: {type: String, required: true},
+    name: {type: String, required: [true, 'Bạn phải nhập tên linh kiện']},
+    price: {type: Number, required: [true, 'Bạn phải nhập giá linh kiện']},
+    type: {type: String, required: [true, 'Bạn phải nhập loại PC hoặc Laptop']},
+    component: {type: String, required: [true, 'Bạn phải nhập loại linh kiện']},
+    description: {type: String, required: [true, 'Bạn phải nhập mô tả cho linh kiện']},
+    insurance: {type: String, required: [true, 'Bạn phải nhập hạn bảo hành cho linh kiện']},
     imgURL: {type: String},
     supplier_id: {type: mongoose.Schema.Types.ObjectId, ref:"supplier"},
     orderdetail_id: [
