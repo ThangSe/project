@@ -1,7 +1,6 @@
 const Booking = require('../models/Booking')
 const Account = require("../models/Account")
 const Order = require("../models/Order")
-const Computer = require("../models/Computer")
 const Buffer = require('buffer/').Buffer
 class BookingController {
     async showAll (req, res) {
@@ -107,7 +106,7 @@ class BookingController {
             let count = await Booking.find().count()/10
             if(status && cus_name) {
                 if(sort == "desc") {
-                    bookings = await Booking.find({status:status, cus_name: cus_name}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    bookings = await Booking.find({status:status, cus_name: { $regex: cus_name, $options: 'i'}}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
                         {
                             path: 'order_id',
                             model: 'order',
@@ -117,7 +116,7 @@ class BookingController {
                     count = await Booking.find({status:status, cus_name: cus_name}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 } else {
-                    bookings = await Booking.find({status:status, cus_name: cus_name}).sort({_id:1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    bookings = await Booking.find({status:status, cus_name: { $regex: cus_name, $options: 'i'}}).sort({_id:1}).limit(limit * 1).skip((page - 1) * limit).populate([
                         {
                             path: 'order_id',
                             model: 'order',
@@ -153,7 +152,7 @@ class BookingController {
                 }      
             }else if(cus_name) {
                 if(sort == "desc") {
-                    bookings = await Booking.find({cus_name: cus_name}).sort({_id: -1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    bookings = await Booking.find({cus_name: { $regex: cus_name, $options: 'i'}}).sort({_id: -1}).limit(limit * 1).skip((page - 1) * limit).populate([
                         {
                             path: 'order_id',
                             model: 'order',
@@ -164,7 +163,7 @@ class BookingController {
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }
                 else {
-                    bookings = await Booking.find({cus_name: cus_name}).sort({_id: 1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    bookings = await Booking.find({cus_name: { $regex: cus_name, $options: 'i'}}).sort({_id: 1}).limit(limit * 1).skip((page - 1) * limit).populate([
                         {
                             path: 'order_id',
                             model: 'order',

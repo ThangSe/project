@@ -405,10 +405,14 @@ class OrderController {
                     }
                 ]
             }])
-            var exchangeOrder = order.toObject();
-            const workSlot = await WorkSlot.findOne({order_id: order.id})
-            exchangeOrder.status_workslot = workSlot.status
-            res.status(200).json(exchangeOrder)
+            if(order.work_slot) {
+                var exchangeOrder = order.toObject()
+                const workSlot = await WorkSlot.findOne({order_id: order.id})
+                exchangeOrder.status_workslot = workSlot.status
+                res.status(200).json(exchangeOrder)
+            } else {
+                res.status(200).json(order)
+            }
         } catch (err) {
             res.status(500).json(err)
         }
