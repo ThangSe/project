@@ -199,6 +199,7 @@ class OrderController {
                     )
                 }
             }
+            await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
             res.status(200).json("Cap nhat thanh cong")  
         } catch (err) {
             res.status(500).json(err)
@@ -381,32 +382,36 @@ class OrderController {
         }
     }
 
-    searchOrderById(req, res, next) {
-        Order.findById(req.params.id).populate([{
-            path: 'orderDetails_id',
-            model: 'orderdetail',
-            populate:[
-                {
-                    path: 'service_id',
-                    model: 'service',
-                    select: 'name description type price hasAccessory'
-                },
-                {
-                    path: 'accessories.accessory_id',
-                    model: 'accessory',
-                    select: 'name description insurance price supplier_id',
-                    populate:{
-                            path: 'supplier_id',
-                            model: 'supplier',
-                            select: 'name'
+    async searchOrderById(req, res) {
+        try {
+            const order = await Order.findById(req.params.id).populate([{
+                path: 'orderDetails_id',
+                model: 'orderdetail',
+                populate:[
+                    {
+                        path: 'service_id',
+                        model: 'service',
+                        select: 'name description type price hasAccessory'
+                    },
+                    {
+                        path: 'accessories.accessory_id',
+                        model: 'accessory',
+                        select: 'name description insurance price supplier_id',
+                        populate:{
+                                path: 'supplier_id',
+                                model: 'supplier',
+                                select: 'name'
+                        }
                     }
-                }
-            ]
-        }])
-            .then(order => {
-                res.status(200).json(order)
-            })
-            .catch(next)
+                ]
+            }])
+
+            const workSlot = await WorkSlot.findOne({order_id: order.id})
+            const {  status, ...orthers} = workSlot._doc
+            res.status(200).json({order, status})
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
     async updateOrderById(req, res, next) {
         try {
