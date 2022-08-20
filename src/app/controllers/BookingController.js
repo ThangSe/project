@@ -109,7 +109,7 @@ class BookingController {
                             select: 'status'
                         }
                     ])
-                    count = await Booking.find({status:status, cus_name: cus_name}).count()/10
+                    count = await Booking.find({status:status, cus_name: { $regex: cus_name, $options: 'i'}}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 } else {
                     bookings = await Booking.find({status:status, cus_name: { $regex: cus_name, $options: 'i'}}).sort({_id:1}).limit(limit * 1).skip((page - 1) * limit).populate([
@@ -119,7 +119,7 @@ class BookingController {
                             select: 'status'
                         }
                     ])
-                    count = await Booking.find({status:status, cus_name: cus_name}).count()/10
+                    count = await Booking.find({status:status, cus_name: { $regex: cus_name, $options: 'i'}}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }
             }
@@ -155,7 +155,7 @@ class BookingController {
                             select: 'status'
                         }
                     ])
-                    count = await Booking.find({cus_name: cus_name}).count()/10
+                    count = await Booking.find({cus_name: { $regex: cus_name, $options: 'i'}}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }
                 else {
@@ -166,7 +166,7 @@ class BookingController {
                             select: 'status'
                         }
                     ])
-                    count = await Booking.find({cus_name: cus_name}).count()/10
+                    count = await Booking.find({cus_name: { $regex: cus_name, $options: 'i'}}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }      
             }
