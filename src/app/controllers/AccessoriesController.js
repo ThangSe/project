@@ -85,7 +85,8 @@ class AccessoriesController {
             const accessory = await Accessory.findById(accessoryId)
             if(accessory.imgURL){
                 const filename = accessory.imgURL.replace("https://computer-services-api.herokuapp.com/accessory/accessory-img/","")
-                await gfs.files.deleteOne({filename: filename})
+                const file = await gfs.files.findOne({filename: filename})
+                await gridfsBucket.delete(file._id)
                 next()
             }else {
                 next()

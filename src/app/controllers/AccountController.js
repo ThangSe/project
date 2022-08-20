@@ -199,10 +199,8 @@ class AccountController {
             const user = await User.findOne({acc_id:acc_id})
             if(user.imgURL){
                 const filename = user.imgURL.replace("https://computer-services-api.herokuapp.com/account/avatar/","")
-                // const file = await gfs.files.findOne({filename: filename})
-                // console.log(file.id)
-                await gfs.files.deleteOne({filename: filename})
-                // await gfs.chunks.deleteOne({files_id: file.id})
+                const file = await gfs.files.findOne({filename: filename})
+                await gridfsBucket.delete(file._id)
                 next()
             }else {
                 next()
