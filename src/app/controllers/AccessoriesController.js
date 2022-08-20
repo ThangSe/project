@@ -60,7 +60,7 @@ class AccessoriesController {
             const name = req.body.name
             const existedAccessory = await Accessory.findOne({name: name})
             if(existedAccessory) {
-                res.status(404).json("Accessory is existed")
+                res.status(404).json("Linh kiện đã tồn tại. Xin thử lại")
             }
             else {
                 const accessory = new Accessory(req.body)
@@ -119,7 +119,7 @@ class AccessoriesController {
                         cb(null, true)
                     }else {
                         cb(null, false)
-                        const err = new Error('Only .png, .jpg and .jpeg format allowed')
+                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
                         err.name = 'ExtensionError'
                         return cb(err)
                     }
@@ -140,7 +140,7 @@ class AccessoriesController {
                 const AccessoryId = req.params.id
                 const URL = "https://computer-services-api.herokuapp.com/accessory/accessory-img/"+req.file.filename
                 await Accessory.findByIdAndUpdate({_id: AccessoryId}, {$set: {imgURL: URL}})
-                res.status(200).json('Upload success')   
+                res.status(200).json('Tải ảnh thành công')   
             })    
         } catch (err) {
             res.status(500).json(err)
@@ -153,7 +153,7 @@ class AccessoriesController {
                 // Check if file
                 if (!file || file.length === 0) {
                   return res.status(404).json({
-                    err: 'No file exists'
+                    err: 'Ảnh không tồn tại'
                   });
                 }
                 
@@ -164,7 +164,7 @@ class AccessoriesController {
                   readstream.pipe(res)
                 } else {
                   res.status(404).json({
-                    err: 'Not an image'
+                    err: 'Không phải là ảnh'
                   })
                  }
                 })

@@ -14,7 +14,7 @@ class AuthController {
             const hashed = await bcrypt.hash(pass, 10)
             const username = req.body.username
             const existedAccount = await Account.findOne({ username: username })
-            if (existedAccount) return res.status(404).json("user is existed")
+            if (existedAccount) return res.status(404).json("Người dùng đã tồn tại")
             const newAccount = await new Account({
                 username,
                 password: hashed
@@ -57,9 +57,9 @@ class AuthController {
 
     async requestRefreshToken(req, res, next) {
         const refreshToken = req.cookies.refreshToken
-        if (!refreshToken) return res.status(401).json("You're not authenicated")
+        if (!refreshToken) return res.status(401).json("Bạn chưa đăng nhập")
         const existedToken = await Account.findOne({ refreshToken: refreshToken })
-        if (!existedToken) return res.status(403).json("Token is not valid")
+        if (!existedToken) return res.status(403).json("Token không khả dụng")
         jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, account) => {
             if (err) {
                 console.log(err)
@@ -87,13 +87,13 @@ class AuthController {
     async login(req, res, next) {
         const account = await Account.findOne({ username: req.body.username, deleted: false })
         if (!account) {
-            return res.status(404).json("User not existed")
+            return res.status(404).json("Tài khoản không tồn tại")
         }
         const validPassword = await bcrypt.compare(
             req.body.password,
             account.password
         )
-        if (!validPassword) return res.status(404).json("Wrong password")
+        if (!validPassword) return res.status(404).json("Sai mật khẩu")
         if (account && validPassword) {
             const authController = new AuthController()
             const accessToken = authController.generateAccessToken(account)
@@ -124,7 +124,7 @@ class AuthController {
         const token = req.headers.token
         const account = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
         Account.findOneAndUpdate({ username: account.username }, { refreshToken: "" }, { new: true })
-            .then(() => res.status(200).json("Logout success"))
+            .then(() => res.status(200).json("Đăng xuất thành công"))
             .catch(next)
     }
 }

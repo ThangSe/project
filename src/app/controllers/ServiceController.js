@@ -47,7 +47,11 @@ class ServiceController {
                 }
             } 
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name == "ValidationError") {
+                res.status(500).json(err)
+            } else {
+                res.status(500).json(err)
+            }
         }
         
     }
