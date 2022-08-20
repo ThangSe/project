@@ -226,8 +226,17 @@ class BookingController {
     async updateBookingById(req, res) {
         try {
             const booking = await Booking.findById(req.params.id)
-            await booking.updateOne({$set: req.body})
-            res.status(200).json("Cập nhật lịch hẹn thành công")
+            if(req.body.status =='Hủy') {
+                if(booking.status == "Đang xử lí") {
+                    await booking.updateOne({$set: req.body})
+                    res.status(200).json("Cập nhật lịch hẹn thành công")
+                } else {
+                    res.status(500).json("Hủy lịch hẹn thất bại")
+                }
+            }else {
+                await booking.updateOne({$set: req.body})
+                res.status(200).json("Cập nhật lịch hẹn thành công")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
@@ -252,13 +261,17 @@ class BookingController {
     async acceptBooking(req, res) {
         try {
             const booking = await Booking.findById(req.body.id)
-            await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
-            const order = new Order()
-            const saveOrder = await order.save()
-            const updateOrder = await Order.findById(saveOrder.id)
-            await updateOrder.updateOne({$set: {booking_id: booking.id}})
-            await booking.updateOne({$set: {order_id: saveOrder.id}})
-            res.status(200).json(saveOrder)
+            if(booking.status == "Đang xử lí") {
+                await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
+                const order = new Order()
+                const saveOrder = await order.save()
+                const updateOrder = await Order.findById(saveOrder.id)
+                await updateOrder.updateOne({$set: {booking_id: booking.id}})
+                await booking.updateOne({$set: {order_id: saveOrder.id}})
+                res.status(200).json(saveOrder)
+            } else {
+                res.status(500).json("Lịch hẹn này đã được cập nhật")
+            }      
         } catch (err) {
             res.status(500).json(err)
         }
@@ -288,7 +301,6 @@ class BookingController {
             res.status(500).json(err)
         }
     }
-
 }
 
 module.exports = new BookingController()
