@@ -15,7 +15,7 @@ router.get('/detail-order/:id', orderController.viewDetailOrder)
 router.post('/add-detail-order/:id', middlewareController.verifyTokenStaff, orderController.deleteAllDetailOrder, orderController.addDetailOrder)
 router.get('/cus/:id', middlewareController.verifyToken, orderController.getOrderByIdForCus)
 router.get('/get-order-total-price/:id', middlewareController.verifyTokenStaff, orderController.getTotalPrice)
-router.patch('/:id', middlewareController.verifyTokenStaff, orderController.updateOrderById)
+router.patch('/:id', middlewareController.verifyTokenStaff, orderController.updateOrderById, orderController.getTotalPrice)
 router.get('/:id', middlewareController.verifyTokenManager, orderController.searchOrderById)
 module.exports = router
     

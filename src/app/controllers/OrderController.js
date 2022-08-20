@@ -245,7 +245,7 @@ class OrderController {
                 path: 'orderDetails_id',
                 model: 'orderdetail'
             }])
-            res.status(200).json(updateOrder)   
+            res.status(200).json("Cập nhật đơn hàng thành công")   
 
         } catch (err) {
             res.status(500).json(err)
@@ -408,11 +408,11 @@ class OrderController {
             })
             .catch(next)
     }
-    async updateOrderById(req, res) {
+    async updateOrderById(req, res, next) {
         try {
             const order = await Order.findById(req.params.id)
             await order.updateOne({$set: req.body})
-            res.status(200).json("Cập nhật thành công")
+            next()
         } catch (err) {
             res.status(500).json(err)
         }
