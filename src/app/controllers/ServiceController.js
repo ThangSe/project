@@ -48,7 +48,10 @@ class ServiceController {
             } 
         } catch (err) {
             if(err.name == "ValidationError") {
-                res.status(500).json(err)
+                for(const error in err.errors){
+                    console.log(error, error.message)
+                }
+                res.status(500).json("OK")
             } else {
                 res.status(500).json(err)
             }
@@ -78,7 +81,7 @@ class ServiceController {
             const serId = req.params.id
             const data = req.body
             const service = await Service.findById(serId)
-            if(service.hasAccessory) {
+            if(service.hasAccessory) {  
                 await service.updateOne({
                     name: data.name,
                     description: data.description,
@@ -89,7 +92,7 @@ class ServiceController {
                 for(const d of data.accessories) {
                     const serviceAccessory = new ServiceAccessory({
                         typeCom: d.typeCom,
-                        service_id: saveService.id,
+                        service_id: service.id,
                         accessory_id: d.accessory_id
                     })
                     await serviceAccessory.save()

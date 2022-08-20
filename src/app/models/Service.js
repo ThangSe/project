@@ -4,11 +4,11 @@ const mongooseDelete = require('mongoose-delete')
 const Schema = mongoose.Schema
 
 const Service = new Schema({
-    name: {type: String, required: true},
-    description: {type: String, required: [true, 'Why no bacon?']},
-    type: {type: String, required: true}, //type: loai dich vu
-    price: {type: Number, required: true},
-    brand: {type: String, required: true}, // lam cho 1 nhan hieu cu the
+    name: {type: String, required: [true, 'Bạn phải nhập tên dịch vụ']},
+    description: {type: String, required: [true, 'Bạn phải nhập mô tả dịch vụ']},
+    type: {type: String, required: [true, 'Bạn phải nhập loại dịch vụ']},
+    price: {type: Number, required: [true, 'Bạn phải nhập giá tiền dịch vụ']},
+    brand: {type: String, required: [true, 'Nhãn hiệu mà dịch vụ cung cấp']},
     hasAccessory: {type: Boolean, required:true, default: false},
     serHasAcc: [
         {type: mongoose.Schema.Types.ObjectId, ref:"serviceaccessory"}
