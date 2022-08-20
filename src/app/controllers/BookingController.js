@@ -107,24 +107,24 @@ class BookingController {
             let count = await Booking.find().count()/10
             if(status && cus_name) {
                 if(sort == "desc") {
-                    bookings = await Booking.find({status:status, cus_namee: cus_name}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    bookings = await Booking.find({status:status, cus_name: cus_name}).sort({_id:-1}).limit(limit * 1).skip((page - 1) * limit).populate([
                         {
                             path: 'order_id',
                             model: 'order',
                             select: 'status'
                         }
                     ])
-                    count = await Booking.find({status:status, cus_namee: cus_name}).count()/10
+                    count = await Booking.find({status:status, cus_name: cus_name}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 } else {
-                    bookings = await Booking.find({status:status, cus_namee: cus_name}).sort({_id:1}).limit(limit * 1).skip((page - 1) * limit).populate([
+                    bookings = await Booking.find({status:status, cus_name: cus_name}).sort({_id:1}).limit(limit * 1).skip((page - 1) * limit).populate([
                         {
                             path: 'order_id',
                             model: 'order',
                             select: 'status'
                         }
                     ])
-                    count = await Booking.find({status:status, cus_namee: cus_name}).count()/10
+                    count = await Booking.find({status:status, cus_name: cus_name}).count()/10
                     return res.status(200).json({count: Math.ceil(count), bookings})
                 }
             }
