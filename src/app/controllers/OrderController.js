@@ -150,57 +150,61 @@ class OrderController {
         try {
             const order = await Order.findById(req.params.id)
             const datas = req.body.datas
-            for(const data of datas) {
-                const hasAccessory = data.hasAccessory
-                const discount = data.discount
-                const listAccId = data.accessories
-                const serId = data.serviceId
-                var priceAcc = 0
-                if(hasAccessory) {
-                    const orderDetail = new OrderDetail({
-                        discount,
-                        service_id: serId,
-                        accessories: data.accessories
-                    })
-                    const saveOrderDetail = await orderDetail.save()
-                    listAccId.forEach(async function(e){
-                        if(e.accessory_id) {
-                            const accessory = await Accessory.findById(e.accessory_id)
-                            priceAcc+=(accessory.price*e.amount_acc)
-                            await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+            if(datas) {
+                for(const data of datas) {
+                    const hasAccessory = data.hasAccessory
+                    const discount = data.discount
+                    const listAccId = data.accessories
+                    const serId = data.serviceId
+                    var priceAcc = 0
+                    if(hasAccessory) {
+                        const orderDetail = new OrderDetail({
+                            discount,
+                            service_id: serId,
+                            accessories: data.accessories
+                        })
+                        const saveOrderDetail = await orderDetail.save()
+                        listAccId.forEach(async function(e){
+                            if(e.accessory_id) {
+                                const accessory = await Accessory.findById(e.accessory_id)
+                                priceAcc+=(accessory.price*e.amount_acc)
+                                await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                            }
+                        })
+                        const service = await Service.findById(serId)
+                        if(service){
+                            await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
                         }
-                    })
-                    const service = await Service.findById(serId)
-                    if(service){
-                        await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
+                        await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                        const totalPrice = (priceAcc + service.price)*(100-discount)/100
+                        await OrderDetail.findByIdAndUpdate(
+                            {_id: saveOrderDetail.id}, 
+                            {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
+                            {new: true}
+                        )
                     }
-                    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-                    const totalPrice = (priceAcc + service.price)*(100-discount)/100
-                    await OrderDetail.findByIdAndUpdate(
-                        {_id: saveOrderDetail.id}, 
-                        {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
-                        {new: true}
-                    )
+                    else {
+                        const orderDetail = new OrderDetail({
+                            discount,
+                            service_id: serId
+                        })
+                        const saveOrderDetail = await orderDetail.save()
+                        const service = await Service.findById(serId)
+                        await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                        await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                        const totalPrice = service.price*(100-discount)/100
+                        await OrderDetail.findByIdAndUpdate(
+                            {_id: saveOrderDetail.id},
+                            {price_after: totalPrice, order_id: order.id, service_id: service.id}, 
+                            {new: true}
+                        )
+                    }
                 }
-                else {
-                    const orderDetail = new OrderDetail({
-                        discount,
-                        service_id: serId
-                    })
-                    const saveOrderDetail = await orderDetail.save()
-                    const service = await Service.findById(serId)
-                    await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-                    const totalPrice = service.price*(100-discount)/100
-                    await OrderDetail.findByIdAndUpdate(
-                        {_id: saveOrderDetail.id},
-                        {price_after: totalPrice, order_id: order.id, service_id: service.id}, 
-                        {new: true}
-                    )
-                }
-            }
-            await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}, $set: {status: 'Chờ xác nhận'}})
-            res.status(200).json("Cập nhật thành công")  
+                await order.updateOne({$set: {status: 'Chờ xác nhận'}})
+                return res.status(200).json("Cập nhật thành công")
+            }else {
+                return res.status(400).json("Không có dữ liệu")
+            }  
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
