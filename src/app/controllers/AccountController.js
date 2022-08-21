@@ -146,17 +146,13 @@ class AccountController {
                 oldPass,
                 account.password
             )
-            const validRepeatPass  = await bcrypt.compare(
-                repeatPass,
-                newPass
-            )
-            if(newPass.localeCompare(repeatPass)) {
+            if(newPass != repeatPass) {
                 return res.status(404).json("Mật khẩu nhập lại không trùng khớp")
             }
             else if(!validOldPass) {
                 return res.status(404).json("Sai mật khẩu")
             }
-            else if (validOldPass && validRepeatPass) {
+            else if (validOldPass && newPass == repeatPass) {
                 const hashed = await bcrypt.hash(newPass, 10)     
                 await account.updateOne({$set: {"password": hashed}})
                 res.status(200).json("Cập nhật thành công")
