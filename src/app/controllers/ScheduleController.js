@@ -100,7 +100,11 @@ class ScheduleController {
                 }
                 res.status(200).json(message)
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }
     }
 
@@ -162,16 +166,34 @@ class ScheduleController {
         try {
             const workSlotId = req.body.workSlotId
             const orderId = req.body.orderId
-            const order = await Order.findById(orderId)
-            if(order.work_slot || order.status != "Đang chờ") {
-                res.status(400).json("Đơn hàng này đã có nhân viên đang làm việc")
+            const order = await Order.findById(orderId).populate("work_slot")
+            const availableWorkSlot = await WorkSlot.findById(workSlotId)
+            if(order.work_slot && order.status != "Đang chờ") {
+                if(availableWorkSlot.status == "busy") {
+                    return res.status(400).json("Nhân viên này đang làm việc")
+                }
+                else if(availableWorkSlot.status == "closed") {
+                    return res.status(400).json("Nhân viên không còn làm việc ở slot này")
+                }else {
+                    await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
+                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
+                    return res.status(200).json("Cử nhân viên thành công")
+                }
             } else {
-                await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})
+                if(availableWorkSlot.status == "open") {
+                    await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
+                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                    return res.status(200).json("Cử nhân viên thành công")
+                } else {
+                    return res.status(200).json("Nhân viên hiện đang không còn làm việc slot này hoặc đang bận")
+                }
             }
-            res.status(200).json("Cử nhân viên thành công")
         } catch (err) {
-            res.status(500).json(err)
+            if(err.name === "ValidationError") {
+                res.status(500).json(Object.values(err.errors).map(val => val.message))
+            } else {
+                res.status(500).json(err)
+            }
         }     
     }
 
