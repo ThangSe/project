@@ -42,7 +42,7 @@ const middlewareController = {
     },
     verifyTokenStaff: (req, res, next) => {
         middlewareController.verifyToken(req,res, () => {
-            if(req.account.role == "staff" || req.account.role == "manager") {
+            if(req.account.role == "staff" || req.account.role == "manager" || req.account.role == "admin") {
                 next()
             }
             else {
