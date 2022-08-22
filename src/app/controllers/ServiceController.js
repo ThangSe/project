@@ -76,31 +76,37 @@ class ServiceController {
     async updateNewDetailService(req, res) {
         try {
             const serId = req.params.id
-            const data = req.body
-            const service = await Service.findById(serId)
-            if(service.hasAccessory) {  
-                await service.updateOne({
-                    name: data.name,
-                    description: data.description,
-                    type: data.type,
-                    price: data.price,
-                    brand: data.brand
-                })
-                for(const d of data.accessories) {
-                    const serviceAccessory = new ServiceAccessory({
-                        typeCom: d.typeCom,
-                        service_id: service.id,
-                        accessory_id: d.accessory_id
+            const data = req.body         
+            const existedService = await Service.findOne({name: data.name,id: {$ne: serId}} )
+            if(existedService) {
+                res.status(400).json("Tên dịch vụ đã tồn tại")
+            }else {
+                const service = await Service.findById(serId)
+                if(service.hasAccessory) {  
+                    await service.updateOne({
+                        name: data.name,
+                        description: data.description,
+                        type: data.type,
+                        price: data.price,
+                        brand: data.brand
                     })
-                    await serviceAccessory.save()
-                    await service.updateOne({$push: {serHasAcc: serviceAccessory.id}}, {new: true})
-                    await Accessory.findByIdAndUpdate({_id: d.accessory_id}, {$push: {serHasAcc: serviceAccessory.id}})
+                    for(const d of data.accessories) {
+                        const serviceAccessory = new ServiceAccessory({
+                            typeCom: d.typeCom,
+                            service_id: service.id,
+                            accessory_id: d.accessory_id
+                        })
+                        await serviceAccessory.save()
+                        await service.updateOne({$push: {serHasAcc: serviceAccessory.id}}, {new: true})
+                        await Accessory.findByIdAndUpdate({_id: d.accessory_id}, {$push: {serHasAcc: serviceAccessory.id}})
+                    }
+                    res.status(200).json("Cập nhật thành công")                  
+                } else {
+                    await service.updateOne(data)
+                    res.status(200).json("Cập nhật thành công")
                 }
-                res.status(200).json("Cập nhật thành công")                  
-            } else {
-                await service.updateOne(data)
-                res.status(200).json("Cập nhật thành công")
             }
+            
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
