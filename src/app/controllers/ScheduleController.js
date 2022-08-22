@@ -271,6 +271,53 @@ class ScheduleController {
         }
     }
 
+    async showOrderWorkingHistory(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_id = accountInfo.id
+            const orders = await WorkSlot.find({staff_id: acc_id, order_id: {$exists: true}}, {_id: 0, oder_id: 1}).sort({id: -1}).populate([{
+                path: 'order_id',
+                model: 'order',
+                match: {
+                    $or: [
+                        {status:{$eq: "Hủy"}},
+                        {status:{$eq: "Hoàn thành"}}
+                    ]
+                },
+                populate: {
+                    path: 'booking_id',
+                    model: 'booking',
+                    populate: {
+                        path: 'acc_id',
+                        model: 'account',
+                        select: 'user_id',
+                        populate: {
+                            path: 'user_id',
+                            model: 'user',
+                            select: 'name'
+                        }
+                    }
+                }
+            },
+            {
+                path: 'staff_id',
+                model: 'account',
+                select: 'user_id',
+                populate: {
+                    path: 'user_id',
+                    model: 'user',
+                    select: 'name'
+                }
+            }
+        ])
+        const ordersCompleted = _.reject(orders, ['order_id', null])
+            res.status(200).json(ordersCompleted)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async showWorkSlotStaff(req, res) {
         try {
             const token = req.headers.token

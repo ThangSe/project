@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const Order = require("../models/Order")
 const WorkSlot = require("../models/WorkSlot")
 const Service = require("../models/Service")
@@ -250,7 +251,7 @@ class OrderController {
             for (var item of order.orderDetails_id){
                 price+= item.price_after
             }
-            const updateOrder = await Order.findOneAndUpdate({_id:order.id}, {totalPrice: price}, {new: true}).populate([{
+            Order.findOneAndUpdate({_id:order.id}, {totalPrice: price}, {new: true}).populate([{
                 path: 'orderDetails_id',
                 model: 'orderdetail'
             }])
@@ -275,9 +276,15 @@ class OrderController {
             const token = req.headers.token
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
-            const orders = await WorkSlot.find({staff_id: acc_id, order_id: {$exists: true}}, {_id: 0, oder_id: 1}).populate([{
+            const orders = await WorkSlot.find({staff_id: acc_id, order_id: {$exists: true}}, {_id: 0, oder_id: 1}).sort({id: -1}).populate([{
                 path: 'order_id',
                 model: 'order',
+                match: {
+                    $and: [
+                        {status:{$ne: "Hủy"}},
+                        {status:{$ne: "Hoàn thành"}}
+                    ]
+                },
                 populate: {
                     path: 'booking_id',
                     model: 'booking',
@@ -304,7 +311,8 @@ class OrderController {
                 }
             }
         ])
-            res.status(200).json(orders)
+        const ordersInProcess = _.reject(orders, ['order_id', null])
+            res.status(200).json(ordersInProcess)
         } catch (err) {
             res.status(500).json(err)
         }
