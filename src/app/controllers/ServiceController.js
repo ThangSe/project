@@ -77,8 +77,8 @@ class ServiceController {
         try {
             const serId = req.params.id
             const data = req.body         
-            const existedService = await Service.findOne({name: data.name,id: {$ne: serId}} )
-            if(existedService) {
+            const existedService = await Service.findOne({name: data.name} )
+            if(existedService && existedService.id != serId) {
                 res.status(400).json("Tên dịch vụ đã tồn tại")
             }else {
                 const service = await Service.findById(serId)

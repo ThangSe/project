@@ -246,14 +246,15 @@ class AccessoriesController {
 
     async updateAccessory (req, res) {
         try {
-            const existedAccessory = await Accessory.findOne({name: req.body.name,id: {$ne: req.params.id}})
-            if(existedAccessory) {
+            const existedAccessory = await Accessory.findOne({name: req.body.name})
+            if(existedAccessory && existedAccessory.id != req.params.id) {
+                console.log(existedAccessory)
                 res.status(400).json("Tên linh kiện đã tồn tại")
-            } else {
+            } else{
                 const filter = {_id: req.params.id}
                 const update = {$set: req.body}
-                const updateAccessory = await Accessory.findByIdAndUpdate(filter, update, {new: true})
-                res.status(200).json(updateAccessory)
+                await Accessory.findByIdAndUpdate(filter, update, {new: true})
+                res.status(200).json("Cập nhật linh kiện thành công")
             }        
         } catch (err) {
             res.status(500).json(err)
