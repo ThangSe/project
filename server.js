@@ -2,7 +2,6 @@ const express = require('express')
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
 require('dotenv').config()
-const helmet = require('helmet')
 const morgan =require('morgan')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
@@ -15,7 +14,6 @@ const app = express()
 
 db.connect()
 
-app.use(helmet({crossOriginEmbedderPolicy: false}))
 app.use(methodOverride('_method'))
 app.use(bodyParser.json({limit:"50mb"}))
 const whitelist = ['http://localhost:3000', 'https://computer-services.netlify.app', 'https://computer-services-api.herokuapp.com/', 'http://localhost:5000']
