@@ -161,7 +161,7 @@ class ServiceController {
     async showAllAccessoriesOfSerive(req, res) {
         try {
             const serId = req.params.serviceId
-            const serHasAccessory = await Service.findOne({_id: serId, hasAccessory: true}).populate([
+            const serHasAccessory = await Service.findOne({_id: serId}).populate([
                 {
                     path: 'serHasAcc',
                     model: 'serviceaccessory',
