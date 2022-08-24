@@ -108,7 +108,7 @@ class ChartController {
             
             const countnewBooking = await Booking.find({createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}}).count()
             const countNewCompleteOrder = await Order.find({status: 'Hoàn thành', createdAt: {$gte: startOfDay(toDay), $lt: endOfDay(toDay)}}).count()
-            const countNewCustomer = await Account.find({createdAt:{$gte: startOfMonth(toDay),$lt: endOfMonth(toDay)}}).count() 
+            const countNewCustomer = await Account.find({role: 'customer', createdAt:{$gte: startOfMonth(toDay),$lt: endOfMonth(toDay)}}).count() 
             const booking = {
                 "name": "Lịch hẹn mới trong hôm nay",
                 "count": countnewBooking
