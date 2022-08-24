@@ -49,7 +49,7 @@ class ChartController {
             if(types.indexOf("newcustomer") > -1 && filter == 'bydate') {
                 const counts = []
                 for (var i = 0; i < dates.length; i++) { 
-                    const count = await Account.find({createdAt:{$gte: startOfDay(dates[i]),$lt: endOfDay(dates[i])}}).count()
+                    const count = await Account.find({role: 'customer', createdAt:{$gte: startOfDay(dates[i]),$lt: endOfDay(dates[i])}}).count()
                     counts.push(count)   
                 }
                 const totalNewCus = {label: "Số khách hàng mới theo ngày", data: counts}
@@ -57,7 +57,7 @@ class ChartController {
             } else if(types.indexOf("newcustomer") > -1 && filter == 'bymonth') {
                 const counts = []
                 for (var i = 0; i < dates.length; i++) {
-                    const count = await Account.find({createdAt:{$gte: startOfMonth(dates[i]),$lt: endOfMonth(dates[i])}}).count()    
+                    const count = await Account.find({role: 'customer', createdAt:{$gte: startOfMonth(dates[i]),$lt: endOfMonth(dates[i])}}).count()    
                     counts.push(count)   
                 }
                 const totalNewCus = {label: "Số khách hàng mới theo tháng", data: counts}
@@ -65,7 +65,7 @@ class ChartController {
             } else if(types.indexOf("newcustomer") > -1 && filter == 'byyear') {
                 const counts = []
                 for (var i = 0; i < dates.length; i++) {
-                    const count = await Account.find({createdAt:{$gte: startOfYear(dates[i]),$lt: endOfYear(dates[i])}}).count()    
+                    const count = await Account.find({role: 'customer', createdAt:{$gte: startOfYear(dates[i]),$lt: endOfYear(dates[i])}}).count()    
                     counts.push(count)   
                 }
                 const totalNewCus = {label: "Số khách hàng mới theo năm", data: counts}
