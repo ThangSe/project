@@ -82,7 +82,7 @@ class ServiceController {
                 res.status(400).json("Tên dịch vụ đã tồn tại")
             }else {
                 const service = await Service.findById(serId)
-                if(service.hasAccessory) {  
+                if(data.hasAccessory) {  
                     await service.updateOne({
                         name: data.name,
                         description: data.description,
