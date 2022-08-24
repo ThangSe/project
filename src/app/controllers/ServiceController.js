@@ -88,7 +88,8 @@ class ServiceController {
                         description: data.description,
                         type: data.type,
                         price: data.price,
-                        brand: data.brand
+                        brand: data.brand,
+                        hasAccessory: data.hasAccessory
                     })
                     for(const d of data.accessories) {
                         const serviceAccessory = new ServiceAccessory({
