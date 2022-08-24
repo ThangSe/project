@@ -161,7 +161,7 @@ class ServiceController {
     async showAllAccessoriesOfSerive(req, res) {
         try {
             const serId = req.params.serviceId
-            const serHasAccessory = await Service.findOne({_id: serId}).populate([
+            const serHasAccessory = await Service.findById(serId).populate([
                 {
                     path: 'serHasAcc',
                     model: 'serviceaccessory',
@@ -169,7 +169,12 @@ class ServiceController {
                     populate: {
                         path: 'accessory_id',
                         model: 'accessory',
-                        select: 'name price type component description insurance',
+                        select: 'name price type component description insurance supplier_id',
+                        populate: {
+                            path: 'supplier_id',
+                            model: 'supplier',
+                            select: 'name'
+                        }
                     }
                 }
             ])
