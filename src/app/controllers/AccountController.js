@@ -4,18 +4,7 @@ const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer').Buffer
 const multer = require('multer')
-const {storage} = require('../../config/db/upload')
-const mongoose = require('mongoose')
-const Grid = require('gridfs-stream')
-const conn = mongoose.createConnection(process.env.DB_CONNECTION)
-let gfs, gridfsBucket
-conn.once('open', () => {
-    gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
-        bucketName: 'uploads'
-      })
-    gfs = Grid(conn.db, mongoose.mongo)
-    gfs.collection('uploads')
-})
+const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
 class AccountController {
     
@@ -200,9 +189,9 @@ class AccountController {
             const user = await User.findOne({acc_id:acc_id})
             if(user.imgURL){
                 const filename = user.imgURL.replace("https://computer-services-api.herokuapp.com/account/avatar/","")
-                const file = await gfs.files.findOne({filename: filename})
+                const file = await fileFind(filename)
                 if(file){
-                    await gridfsBucket.delete(file._id)
+                    await deletedFile(file)
                 }
                 next()
             }else {

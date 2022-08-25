@@ -23,6 +23,13 @@ const storage = new GridFsStorage({
         })
     }
     })
+    const fileFind = async (filename) => {
+        const file = await gfs.files.findOne({filename: filename})
+        return file
+    }
+    const deletedFile = async (file) => {
+        await gridfsBucket.delete(file._id)
+    }
     const getImg = async (req, res) => {
         try {
             await gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
@@ -48,4 +55,4 @@ const storage = new GridFsStorage({
             res.status(500).json(err)
         }
     }
-module.exports = {storage, getImg}
+module.exports = {storage, fileFind, deletedFile, getImg}

@@ -8,18 +8,8 @@ const Accessory = require('../models/Accessory')
 const Computer = require('../models/Computer')
 const Buffer = require('buffer/').Buffer
 const multer = require('multer')
-const {storage} = require('../../config/db/upload')
-const mongoose = require('mongoose')
-const Grid = require('gridfs-stream')
-let gfs, gridfsBucket
-const conn = mongoose.createConnection(process.env.DB_CONNECTION)
-conn.once('open', () => {
-    gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
-        bucketName: 'uploads'
-      })
-    gfs = Grid(conn.db, mongoose.mongo)
-    gfs.collection('uploads')
-})
+const {storage, fileFind, deletedFile} = require('../../config/db/upload')
+
 class OrderController {
     // GET order/test1
     async showAllServiceToChoose(req, res) {    
@@ -167,9 +157,9 @@ class OrderController {
             if(order.imgComUrls.length > 0){
                 for (var i = 0; i<order.imgComUrls.length; i++){
                     const filename = order.imgComUrls[i].replace("https://computer-services-api.herokuapp.com/order/order-img/","")
-                    const file = await gfs.files.findOne({filename: filename})
+                    const file = await fileFind(filename)
                     if(file){
-                        await gridfsBucket.delete(file._id)
+                        await deletedFile(file)
                     }
                 }        
                 next()

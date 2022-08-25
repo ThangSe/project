@@ -2,18 +2,7 @@ const Accessory = require('../models/Accessory')
 const ServiceAccessory = require('../models/ServiceAccessory')
 const Supplier = require('../models/Supplier')
 const multer = require('multer')
-const {storage} = require('../../config/db/upload')
-const mongoose = require('mongoose')
-const Grid = require('gridfs-stream')
-const conn = mongoose.createConnection(process.env.DB_CONNECTION)
-let gfs, gridfsBucket
-conn.once('open', () => {
-    gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
-        bucketName: 'uploads'
-      })
-    gfs = Grid(conn.db, mongoose.mongo)
-    gfs.collection('uploads')
-})
+const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
 class AccessoriesController {
     //GET /accessory/all-accessories
@@ -85,9 +74,9 @@ class AccessoriesController {
             const accessory = await Accessory.findById(accessoryId)
             if(accessory.imgURL){
                 const filename = accessory.imgURL.replace("https://computer-services-api.herokuapp.com/accessory/accessory-img/","")
-                const file = await gfs.files.findOne({filename: filename})
+                const file = await fileFind(filename)
                 if(file){
-                    await gridfsBucket.delete(file._id)
+                    await deletedFile(file)
                 }
                 next()
             }else {
