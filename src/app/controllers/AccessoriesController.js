@@ -92,7 +92,6 @@ class AccessoriesController {
                 }
                 next()
             }else {
-                console.log("here1")
                 next()
             }
         } catch (err) {
@@ -239,7 +238,6 @@ class AccessoriesController {
         try {
             const existedAccessory = await Accessory.findOne({name: req.body.name})
             if(existedAccessory && existedAccessory.id != req.params.id) {
-                console.log(existedAccessory)
                 res.status(400).json("Tên linh kiện đã tồn tại")
             } else{
                 const filter = {_id: req.params.id}

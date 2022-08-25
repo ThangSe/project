@@ -6,5 +6,5 @@ router.get("/all-computers", middlewareController.verifyTokenManager, computerCo
 router.get("/computer-by-id/:id", middlewareController.verifyTokenManager, computerController.getComputerById)
 router.get("/computer-by-code/:ccode", middlewareController.verifyTokenStaff, computerController.getComputerByCode)
 router.post("/new-computer", middlewareController.verifyTokenManager, computerController.createComputer)
-
+router.patch("/upadated-computer/:id", middlewareController.verifyTokenStaff, computerController.updateComputer)
 module.exports = router

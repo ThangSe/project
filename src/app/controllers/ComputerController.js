@@ -44,6 +44,22 @@ class ServiceController {
         }
         
     }
+    async updateComputer(req, res) {
+        try {
+            const existedComputer = await Computer.findOne({code: req.body.code})
+            if(existedComputer && existedComputer.id != req.params.id) {
+                res.status(400).json("Code máy này đã có trên hệ thống")
+            }else {
+                const filter = {_id: req.params.id}
+                const update = {$set: req.body}
+                await Computer.findByIdAndUpdate(filter, update, {new: true})
+                res.status(200).json("Cập nhật máy tính thành công")
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+        
+    }
 
     //POST 
     
