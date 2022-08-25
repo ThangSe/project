@@ -1,9 +1,9 @@
 const Accessory = require('../models/Accessory')
 const ServiceAccessory = require('../models/ServiceAccessory')
 const Supplier = require('../models/Supplier')
-const mongoose = require('mongoose')
 const multer = require('multer')
-const {GridFsStorage} = require('multer-gridfs-storage')
+const {storage} = require('../../config/db/upload')
+const mongoose = require('mongoose')
 const Grid = require('gridfs-stream')
 const conn = mongoose.createConnection(process.env.DB_CONNECTION)
 let gfs, gridfsBucket
@@ -84,11 +84,15 @@ class AccessoriesController {
             const accessoryId = req.params.id
             const accessory = await Accessory.findById(accessoryId)
             if(accessory.imgURL){
+                console.log("here")
                 const filename = accessory.imgURL.replace("https://computer-services-api.herokuapp.com/accessory/accessory-img/","")
                 const file = await gfs.files.findOne({filename: filename})
-                await gridfsBucket.delete(file._id)
+                if(file){
+                    await gridfsBucket.delete(file._id)
+                }
                 next()
             }else {
+                console.log("here1")
                 next()
             }
         } catch (err) {
@@ -98,19 +102,6 @@ class AccessoriesController {
 
     async updateImgAccessories(req, res) {
         try {
-            const storage = new GridFsStorage({
-                url: process.env.DB_CONNECTION,
-                file: (req, file) => {
-                    return new Promise((resolve, reject) => {
-                        const filename = Date.now() + '-' + file.originalname
-                        const fileInfo = {
-                        filename: filename,
-                        bucketName: 'uploads'
-                        }
-                        resolve(fileInfo)
-                    })
-                }
-                })
             const upload = multer({
                 storage,
                 limits: {fileSize: 1 * 1024 * 1024 },

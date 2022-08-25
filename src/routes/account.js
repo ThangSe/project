@@ -1,5 +1,6 @@
 const accountController = require("../app/controllers/AccountController")
 const middlewareController = require("../app/controllers/MiddlewareController")
+const imgFunc = require("../config/db/upload")
 const router = require("express").Router()
 
 router.get("/all/lastest-account", middlewareController.verifyTokenManager, accountController.showLastestAccount)
@@ -14,7 +15,7 @@ router.patch("/change-password", middlewareController.verifyToken, accountContro
 router.patch("/editprofile", middlewareController.verifyToken, accountController.updateProfileAccount)
 router.post("/register-staff", accountController.registerAccountStaff)
 router.post("/editimgprofile",middlewareController.verifyToken,accountController.deleteImgProfileAccount, accountController.updateImgProfileAccount)
-router.get("/avatar/:filename", accountController.getAvatar)
+router.get("/avatar/:filename", imgFunc.getImg)
 router.get("/byId/:id", middlewareController.verifyTokenManager, accountController.getAccountById)
 router.patch("/restored-account/:id", middlewareController.verifyTokenManager,  accountController.restoreAccount)
 router.delete("deleted-account/:id", middlewareController.verifyTokenManager, accountController.deleteAccount)

@@ -7,6 +7,19 @@ const ServiceAccessory = require("../models/ServiceAccessory")
 const Accessory = require('../models/Accessory')
 const Computer = require('../models/Computer')
 const Buffer = require('buffer/').Buffer
+const multer = require('multer')
+const {storage} = require('../../config/db/upload')
+const mongoose = require('mongoose')
+const Grid = require('gridfs-stream')
+const conn = mongoose.createConnection(process.env.DB_CONNECTION)
+let gfs, gridfsBucket
+conn.once('open', () => {
+    gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
+        bucketName: 'uploads'
+      })
+    gfs = Grid(conn.db, mongoose.mongo)
+    gfs.collection('uploads')
+})
 class OrderController {
     // GET order/test1
     async showAllServiceToChoose(req, res) {    
@@ -146,6 +159,67 @@ class OrderController {
             res.status(500).json(err)
         }
     }
+
+    async deleteImgOrder(req, res, next) {
+        try {
+            const orderId = req.params.id
+            const order = await Order.findById(orderId)
+            if(order.imgComUrls.length > 0){
+                for (var i = 0; i<order.imgComUrls.length; i++){
+                    const filename = order.imgComUrls[i].replace("https://computer-services-api.herokuapp.com/order/order-img/","")
+                    const file = await gfs.files.findOne({filename: filename})
+                    if(file){
+                        await gridfsBucket.delete(file._id)
+                    }
+                }        
+                next()
+            }else {
+                next()
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async addImageComputerToOrder(req, res) {
+        try {
+            const upload = multer({
+                storage,
+                limits: {fileSize: 1 * 1024 * 1024 },
+                fileFilter: (req, file, cb) => {
+                    if(file.originalname.match(/\.(jpg|png|jpeg)$/)){
+                        cb(null, true)
+                    }else {
+                        cb(null, false)
+                        const err = new Error('Chỉ nhận định dạng .png, .jpg và .jpeg')
+                        err.name = 'ExtensionError'
+                        return cb(err)
+                    }
+                }
+            }).array('img', 5)
+            upload(req, res, async(err) => {
+                if(err instanceof multer.MulterError) {
+                    res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
+                    return
+                } else if(err) {
+                    if(err.name == 'ExtensionError') {
+                        res.status(413).json({ error: { message: err.message } }).end()
+                    } else {
+                        res.status(500).json({ error: { message: `unknown uploading error: ${err.message}` } }).end()
+                    }
+                    return
+                }
+                const orderId = req.params.id
+                const URLs = req.files.map(file => "https://computer-services-api.herokuapp.com/order/order-img/"+file.filename)
+                await Order.findByIdAndUpdate({_id: orderId}, {$set: {imgComUrls: []}})
+                await Order.findByIdAndUpdate({_id: orderId}, {$push: {imgComUrls: {$each: URLs}}})
+                res.status(200).json('Tải ảnh thành công')   
+            })
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
@@ -251,12 +325,8 @@ class OrderController {
             for (var item of order.orderDetails_id){
                 price+= item.price_after
             }
-            Order.findOneAndUpdate({_id:order.id}, {totalPrice: price}, {new: true}).populate([{
-                path: 'orderDetails_id',
-                model: 'orderdetail'
-            }])
-            res.status(200).json("Cập nhật đơn hàng thành công")   
-
+            await Order.findByIdAndUpdate({_id:order.id}, {totalPrice: price}, {new: true})
+            res.status(200).json("Cập nhật thành công")  
         } catch (err) {
             res.status(500).json(err)
         }

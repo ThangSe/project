@@ -3,13 +3,10 @@ const Agency = require("../models/Agency")
 const User = require("../models/User")
 const bcrypt = require("bcrypt")
 const Buffer = require('buffer').Buffer
-const mongoose = require('mongoose')
 const multer = require('multer')
-const {GridFsStorage} = require('multer-gridfs-storage')
+const {storage} = require('../../config/db/upload')
+const mongoose = require('mongoose')
 const Grid = require('gridfs-stream')
-const crypto = require('crypto')
-const path = require('path')
-
 const conn = mongoose.createConnection(process.env.DB_CONNECTION)
 let gfs, gridfsBucket
 conn.once('open', () => {
@@ -204,7 +201,9 @@ class AccountController {
             if(user.imgURL){
                 const filename = user.imgURL.replace("https://computer-services-api.herokuapp.com/account/avatar/","")
                 const file = await gfs.files.findOne({filename: filename})
-                await gridfsBucket.delete(file._id)
+                if(file){
+                    await gridfsBucket.delete(file._id)
+                }
                 next()
             }else {
                 next()
@@ -220,24 +219,6 @@ class AccountController {
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
             const user = await User.findOne({acc_id:acc_id})  
-            const storage = new GridFsStorage({
-                url: process.env.DB_CONNECTION,
-                file: (req, file) => {
-                    return new Promise((resolve, reject) => {
-                        crypto.randomBytes(16, (err, buf) => {
-                            if(err) {
-                            return reject(err)
-                            }
-                            const filename = buf.toString('hex') + path.extname(file.originalname)
-                            const fileInfo = {
-                            filename: filename,
-                            bucketName: 'uploads'
-                            }
-                            resolve(fileInfo)
-                        })
-                    })
-                }
-                })
             const upload = multer({
                 storage,
                 limits: {fileSize: 1 * 1024 * 1024 },
@@ -268,31 +249,6 @@ class AccountController {
                 await user.updateOne({$set: {imgURL: URL}})
                 res.status(200).json('Upload success') 
             })                 
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
-    async getAvatar(req, res) {
-        try {
-            await gfs.files.findOne({ filename: req.params.filename } , (err, file) => {
-                // Check if file
-                if (!file || file.length === 0) {
-                  return res.status(404).json({
-                    err: 'No file exists'
-                  });
-                }
-                
-                // Check if image
-                if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
-                  // Read output to browser
-                  const readstream = gridfsBucket.openDownloadStream(file._id);
-                  readstream.pipe(res)
-                } else {
-                  res.status(404).json({
-                    err: 'Not an image'
-                  })
-                 }
-                })
         } catch (err) {
             res.status(500).json(err)
         }
