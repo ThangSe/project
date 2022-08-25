@@ -572,7 +572,7 @@ class OrderController {
             const orderId = req.params.id
             const existedComputer = await Computer.findOne({code: data.code})
             if(existedComputer) {
-                await Computer.findByIdAndUpdate({_id: existedComputer.id}, {$push: {order_id: orderId}})
+                await Computer.findByIdAndUpdate({_id: existedComputer.id}, {$set: req.body, $push: {order_id: orderId}})
                 await Order.findByIdAndUpdate({_id: orderId}, {$set: {computer_id: existedComputer.id}})
             } else {
                 const computer = new Computer(data)
