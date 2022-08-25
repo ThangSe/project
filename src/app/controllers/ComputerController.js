@@ -1,5 +1,5 @@
 const Computer = require('../models/Computer')
-class ServiceController {
+class ComputerController {
     //GET 
     showAllComputer(req, res, next) {
         Computer.find({})
@@ -87,4 +87,4 @@ class ServiceController {
     
 }
 
-module.exports = new ServiceController()
+module.exports = new ComputerController()
