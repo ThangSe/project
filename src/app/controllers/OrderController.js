@@ -11,8 +11,8 @@ const multer = require('multer')
 const {storage} = require('../../config/db/upload')
 const mongoose = require('mongoose')
 const Grid = require('gridfs-stream')
-const conn = mongoose.createConnection(process.env.DB_CONNECTION)
 let gfs, gridfsBucket
+const conn = mongoose.createConnection(process.env.DB_CONNECTION)
 conn.once('open', () => {
     gridfsBucket = new mongoose.mongo.GridFSBucket(conn.db, {
         bucketName: 'uploads'

@@ -84,7 +84,6 @@ class AccessoriesController {
             const accessoryId = req.params.id
             const accessory = await Accessory.findById(accessoryId)
             if(accessory.imgURL){
-                console.log("here")
                 const filename = accessory.imgURL.replace("https://computer-services-api.herokuapp.com/accessory/accessory-img/","")
                 const file = await gfs.files.findOne({filename: filename})
                 if(file){
