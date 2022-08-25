@@ -391,7 +391,7 @@ class OrderController {
                 path: 'order_id',
                 model: 'order',
                 match: {
-                    $and: [
+                    $or: [
                         {status:{$eq: "Hủy"}},
                         {status:{$eq: "Hoàn thành"}}
                     ]
