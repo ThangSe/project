@@ -11,7 +11,18 @@ class ServiceController {
 
     async getComputerById(req, res) {
         try {
-            const computer = await Computer.findById(req.params.id)
+            const computer = await Computer.findById(req.params.id).populate([
+                {
+                    path: 'order',
+                    model: 'order',
+                    select: 'totalPrice status imgComUrls orderDetails_id',
+                    populate: {
+                        path: 'orderDetails_id',
+                        model: 'orderdetail'
+                    }
+
+                }
+            ])
             res.status(200).json(computer)
         } catch (err) {
             res.status(500).json(err)
@@ -21,7 +32,18 @@ class ServiceController {
 
     async getComputerByCode(req, res) {
         try {
-            const computer = await Computer.findOne({code: req.params.code})
+            const computer = await Computer.findOne({code: req.params.code}).populate([
+                {
+                    path: 'order',
+                    model: 'order',
+                    select: 'totalPrice status imgComUrls orderDetails_id',
+                    populate: {
+                        path: 'orderDetails_id',
+                        model: 'orderdetail'
+                    }
+
+                }
+            ])
             res.status(200).json(computer)
         } catch (err) {
             res.status(500).json(err)
