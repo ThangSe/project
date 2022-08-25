@@ -480,7 +480,12 @@ class OrderController {
                         }
                     }
                 ]
-            }])
+            },
+            {
+                path: 'computer_id',
+                model: 'computer'
+            }
+        ])
             if(order.work_slot) {
                 var exchangeOrder = order.toObject()
                 const workSlot = await WorkSlot.findOne({order_id: order.id})

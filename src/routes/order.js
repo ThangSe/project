@@ -13,7 +13,7 @@ router.patch('/customer-confirm', middlewareController.verifyTokenCustomer, orde
 router.patch('/complete-order', middlewareController.verifyTokenStaff, orderController.completeOrder)
 router.patch('/cancel-order', middlewareController.verifyTokenStaff, orderController.cancelOrder)
 router.get('/staff/:id', middlewareController.verifyTokenStaff, orderController.getOrderByStaff)
-router.get('/detail-order/:id', orderController.viewDetailOrder)
+router.get('/detail-order/:id',mideddlewareController.verifyToken, orderController.viewDetailOrder)
 router.post("/upload-img/:id", middlewareController.verifyTokenStaff, orderController.deleteImgOrder, orderController.addImageComputerToOrder)
 router.post('/add-detail-order/:id', middlewareController.verifyTokenStaff, orderController.deleteAllDetailOrder, orderController.addDetailOrder)
 router.get('/cus/:id', middlewareController.verifyToken, orderController.getOrderByIdForCus)
