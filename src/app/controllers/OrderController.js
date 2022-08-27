@@ -621,6 +621,9 @@ class OrderController {
     async cancelOrder(req, res) {
         try {
             const order = await Order.findById(req.body.id)
+            if(order.work_slot){
+                await WorkSlot.findByIdAndUpdate({id: order.work_slot}, {$set: {status: 'open'}})
+            }
             await order.updateOne({$set: {status: 'Hủy'}})
             res.status(200).json("Đơn hàng đã bị hủy")
         } catch (err) {
