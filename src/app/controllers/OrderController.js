@@ -37,7 +37,7 @@ class OrderController {
                             populate: {
                                 path: 'accessory_id',
                                 model: 'accessory',
-                                select: 'name price type component description insurance supplier_id',
+                                select: 'name price type component description insurance supplier_id imgURL',
                                 populate: {
                                     path: 'supplier_id',
                                     model: 'supplier',
@@ -56,7 +56,7 @@ class OrderController {
                             populate: {
                                 path: 'accessory_id',
                                 model: 'accessory',
-                                select: 'name price type component description insurance supplier_id',
+                                select: 'name price type component description insurance supplier_id imgURL',
                                 populate: {
                                     path: 'supplier_id',
                                     model: 'supplier',
