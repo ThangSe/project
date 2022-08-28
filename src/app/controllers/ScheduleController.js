@@ -161,6 +161,15 @@ class ScheduleController {
             res.status(500).json(err)
         }
     }
+
+    async stillBusyStaff(req, res) {
+        try {
+            await WorkSlot.findOneAndUpdate({order_id: req.params.id}, {status: 'closed'})
+            res.status(200).json("Báo bận thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
     
     async assignWorkSlotToOrder (req, res) {
         try {

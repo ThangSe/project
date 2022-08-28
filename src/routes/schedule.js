@@ -14,4 +14,5 @@ router.get('/show-workslot-thisweek', middlewareController.verifyTokenStaff, sch
 router.get('/show-schedule-for-assign', scheduleController.showScheduleForAssign)
 router.get('/work-slot/:id', middlewareController.verifyTokenManager, scheduleController.showWorkSlotByStaffId)
 router.get('/order-working-history', middlewareController.verifyTokenStaff, scheduleController.showOrderWorkingHistory)
+router.patch('/staff-in-work/:id', middlewareController.verifyTokenStaff, scheduleController.stillBusyStaff)
 module.exports = router
