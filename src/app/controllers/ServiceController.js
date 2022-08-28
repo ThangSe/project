@@ -57,18 +57,24 @@ class ServiceController {
     }
     async deleteAllDetailService(req, res, next) {
         try {
+            const data = req.body
             const service = await Service.findById(req.params.id)
-            if(service.serHasAcc){
-                for(const bridgeId of service.serHasAcc) {
-                    const bridge = await ServiceAccessory.findById(bridgeId)
-                    await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
-                    await Service.findByIdAndUpdate({_id: service.id}, {$pull: {serHasAcc: bridgeId}})
-                    await ServiceAccessory.deleteOne({_id: bridgeId})
-                }
-                next()
+            const existedService = await Service.findOne({name: data.name})
+            if(existedService && existedService.id != req.params.id){
+                return res.status(400).json("Tên dịch vụ đã tồn tại")
             } else {
-                next()
-            }
+                if(service.serHasAcc){
+                    for(const bridgeId of service.serHasAcc) {
+                        const bridge = await ServiceAccessory.findById(bridgeId)
+                        await Accessory.findByIdAndUpdate({_id: bridge.accessory_id}, {$pull: {serHasAcc: bridge.id}})
+                        await Service.findByIdAndUpdate({_id: service.id}, {$pull: {serHasAcc: bridgeId}})
+                        await ServiceAccessory.deleteOne({_id: bridgeId})
+                    }
+                    next()
+                } else {
+                    next()
+                }
+            }     
         } catch (err) {
             res.status(500).json(err)
         }
@@ -77,11 +83,7 @@ class ServiceController {
         try {
             const serId = req.params.id
             const data = req.body         
-            const existedService = await Service.findOne({name: data.name} )
-            if(existedService && existedService.id != serId) {
-                res.status(400).json("Tên dịch vụ đã tồn tại")
-            }else {
-                const service = await Service.findById(serId)
+            const service = await Service.findById(serId)
                 if(data.hasAccessory) {  
                     await service.updateOne({
                         name: data.name,
@@ -105,9 +107,7 @@ class ServiceController {
                 } else {
                     await service.updateOne(data)
                     res.status(200).json("Cập nhật thành công")
-                }
-            }
-            
+                }            
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
