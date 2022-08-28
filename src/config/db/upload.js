@@ -35,9 +35,7 @@ const storage = new GridFsStorage({
             await gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
                 // Check if file
                 if (!file || file.length === 0) {
-                  return res.status(404).json({
-                    err: 'Ảnh không tồn tại'
-                  });
+                  return res.status(404).json('Ảnh không tồn tại');
                 }
                 
                 // Check if image
@@ -46,9 +44,7 @@ const storage = new GridFsStorage({
                   const readstream = gridfsBucket.openDownloadStream(file._id);
                   readstream.pipe(res)
                 } else {
-                  res.status(404).json({
-                    err: 'Không phải là ảnh'
-                  })
+                  res.status(404).json('Không phải là ảnh')
                  }
                 })
         } catch (err) {

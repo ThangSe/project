@@ -224,13 +224,13 @@ class AccountController {
             }).single('img')
             upload(req, res, async(err) => {
                 if(err instanceof multer.MulterError) {
-                    res.status(500).json({err: { message: `Multer uploading error: ${err.message}` }}).end()
+                    res.status(500).json(`Multer uploading error: ${err.message}`).end()
                     return
                 } else if(err) {
                     if(err.name == 'ExtensionError') {
-                        res.status(413).json({ error: { message: err.message } }).end()
+                        res.status(413).json(err.message).end()
                     } else {
-                        res.status(500).json({ error: { message: `unknown uploading error: ${err.message}` } }).end()
+                        res.status(500).json(`unknown uploading error: ${err.message}`).end()
                     }
                     return
                 }
