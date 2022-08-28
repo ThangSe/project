@@ -604,12 +604,12 @@ class OrderController {
             }
         }
     }
-    async acceptOrder(req, res) {
+    async acceptOrder(req, res, next) {
         try {
             const order = await Order.findById(req.body.id)
             if(order.status == 'Chờ xác nhận'){
                 await order.updateOne({$set: {status: 'Quản lí xác nhận'}})
-                res.status(200).json("Đơn hàng đã được xác nhận")
+                next()
             }
             else {
                 res.status(404).json("Đơn hàng không ở trạng thái chờ")
