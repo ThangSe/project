@@ -192,7 +192,7 @@ class ScheduleController {
                         return res.status(200).json("Cử nhân viên thành công")
                     }
                 } else {
-                    return res.status(404).json("Slot này nhân viên vẫn đang làm việc")
+                    return res.status(400).json("Slot này nhân viên vẫn đang làm việc")
                 }               
             } else {
                 if(availableWorkSlot.status == "open") {
@@ -200,7 +200,7 @@ class ScheduleController {
                     await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
                     return res.status(200).json("Cử nhân viên thành công")
                 } else {
-                    return res.status(200).json("Nhân viên hiện đang không còn làm việc slot này hoặc đang bận")
+                    return res.status(400).json("Nhân viên hiện đang không còn làm việc slot này hoặc đang bận")
                 }
             }
         } catch (err) {
