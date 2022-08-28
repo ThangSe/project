@@ -169,17 +169,22 @@ class ScheduleController {
             const order = await Order.findById(orderId).populate("work_slot")
             const availableWorkSlot = await WorkSlot.findById(workSlotId)
             if(order.work_slot && order.status != "Đang chờ") {
-                if(availableWorkSlot.status == "busy") {
-                    return res.status(400).json("Nhân viên này đang làm việc")
-                }
-                else if(availableWorkSlot.status == "closed") {
-                    return res.status(400).json("Nhân viên không còn làm việc ở slot này")
-                }else {
-                    await WorkSlot.findOneAndUpdate({order_id: order.id}, {$unset: {order_id: ""}})
-                    await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})                   
-                    return res.status(200).json("Cử nhân viên thành công")
-                }
+                const orderWorkSlot = await WorkSlot.findById(order.work_slot)
+                if(orderWorkSlot.status == "closed") {
+                    if(availableWorkSlot.status == "busy") {
+                        return res.status(400).json("Nhân viên này đang làm việc")
+                    }
+                    else if(availableWorkSlot.status == "closed") {
+                        return res.status(400).json("Nhân viên không còn làm việc ở slot này")
+                    }else {
+                        await WorkSlot.findOneAndUpdate({order_id: order.id}, {$unset: {order_id: ""}})
+                        await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
+                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})                   
+                        return res.status(200).json("Cử nhân viên thành công")
+                    }
+                } else {
+                    return res.status(404).json("Slot này nhân viên vẫn đang làm việc")
+                }               
             } else {
                 if(availableWorkSlot.status == "open") {
                     await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
