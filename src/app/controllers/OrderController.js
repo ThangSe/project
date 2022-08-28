@@ -571,7 +571,6 @@ class OrderController {
             const order = await Order.findById(req.params.id)
             if(order.status == 'Chờ xác nhận'){
                 await order.updateOne({$set: req.body})
-                res.status(200).json('Cập nhật thành công')
             }
             next()
         } catch (err) {
