@@ -573,7 +573,7 @@ class OrderController {
                 await order.updateOne({$set: req.body})
                 next()
             } else {
-                res.status(404).json("Trạng thái đơn hơn đã thay đổi")
+                res.status(404).json("Trạng thái đơn hàng đã thay đổi")
             }          
         } catch (err) {
             if(err.name === "ValidationError") {
