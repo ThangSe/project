@@ -20,8 +20,8 @@ router.post('/add-detail-order/:id', middlewareController.verifyTokenStaff, orde
 router.get('/cus/:id', middlewareController.verifyToken, orderController.getOrderByIdForCus)
 router.get("/order-img/:filename", imgFunc.getImg)
 router.get('/get-order-total-price/:id', middlewareController.verifyTokenStaff, orderController.getTotalPrice)
+router.patch('/manager-confirm/:id', middlewareController.verifyTokenManager, orderController.updateOrderByIdForManager, orderController.getTotalPrice)
 router.patch('/:id', middlewareController.verifyTokenStaff, orderController.updateOrderById, orderController.getTotalPrice)
-router.patch('/manager-confirm/:id', middlewareController.verifyTokenManager, orderController.updateOrderByIdForManager)
 router.get('/:id', middlewareController.verifyTokenManager, orderController.searchOrderById)
 module.exports = router
     

@@ -572,9 +572,8 @@ class OrderController {
             if(order.status == 'Chờ xác nhận'){
                 await order.updateOne({$set: req.body})
                 res.status(200).json('Cập nhật thành công')
-            } else {
-                res.status(400).json('Hóa đơn đã được cập nhật')
             }
+            next()
         } catch (err) {
             if(err.name === "ValidationError") {
                 res.status(500).json(Object.values(err.errors).map(val => val.message))
