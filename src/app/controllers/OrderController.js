@@ -606,7 +606,7 @@ class OrderController {
     }
     async acceptOrder(req, res, next) {
         try {
-            const order = await Order.findById(req.body.id)
+            const order = await Order.findById(req.params.id)
             if(order.status == 'Chờ xác nhận'){
                 await order.updateOne({$set: {status: 'Quản lí xác nhận'}})
                 next()
