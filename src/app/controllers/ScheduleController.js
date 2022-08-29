@@ -10,6 +10,7 @@ const Buffer = require('buffer/').Buffer
 const _ = require('lodash');
 const startOfWeek = require('date-fns/startOfWeek')
 const endOfWeek = require('date-fns/endOfWeek')
+const add = require('date-fns/add')
 
 class ScheduleController {
     // POST /schedule/assignslot
@@ -173,6 +174,8 @@ class ScheduleController {
     
     async assignWorkSlotToOrder (req, res) {
         try {
+            const num2hour = hour => hour.toString().replace(/(\d{1,2})(\d{2})$/,"$1")
+            const num2minute = minute => minute.toString().replace(/(\d{1,2})(\d{2})$/,"$2")
             const workSlotId = req.body.workSlotId
             const orderId = req.body.orderId
             const order = await Order.findById(orderId).populate("work_slot")
@@ -188,7 +191,12 @@ class ScheduleController {
                     }else {
                         await WorkSlot.findOneAndUpdate({order_id: order.id}, {$unset: {order_id: ""}})
                         await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}})                   
+                        const workSlot = await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                        const slot = await Slot.findById(workSlot.slot_id)
+                        const schedule = await Schedule.findById(slot.schedule_id)
+                        const date = schedule.date
+                        const newDate = add(date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})     
+                        await Booking.findOneAndUpdate({order_id: order.id}, {$set: {time: newDate}})              
                         return res.status(200).json("Cử nhân viên thành công")
                     }
                 } else {
@@ -197,7 +205,12 @@ class ScheduleController {
             } else {
                 if(availableWorkSlot.status == "open") {
                     await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                    const workSlot = await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                    const slot = await Slot.findById(workSlot.slot_id)
+                    const schedule = await Schedule.findById(slot.schedule_id)
+                    const date = schedule.date
+                    const newDate = add(date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})     
+                    await Booking.findOneAndUpdate({order_id: order.id}, {$set: {time: newDate}}) 
                     return res.status(200).json("Cử nhân viên thành công")
                 } else {
                     return res.status(400).json("Nhân viên hiện đang không còn làm việc slot này hoặc đang bận")
@@ -475,7 +488,6 @@ class ScheduleController {
             res.status(500).json(err)
         }
     }
-
 }
 
 module.exports = new ScheduleController()
