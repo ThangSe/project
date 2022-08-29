@@ -191,7 +191,8 @@ class ScheduleController {
                     }else {
                         await WorkSlot.findOneAndUpdate({order_id: order.id}, {$unset: {order_id: ""}})
                         await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                        const workSlot = await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                        const workSlot = await WorkSlot.findById(workSlotId)
                         const slot = await Slot.findById(workSlot.slot_id)
                         const schedule = await Schedule.findById(slot.schedule_id)
                         const date = schedule.date
@@ -205,11 +206,12 @@ class ScheduleController {
             } else {
                 if(availableWorkSlot.status == "open") {
                     await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                    const workSlot = await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                    const workSlot = await WorkSlot.findById(workSlotId)
                     const slot = await Slot.findById(workSlot.slot_id)
                     const schedule = await Schedule.findById(slot.schedule_id)
                     const date = schedule.date
-                    const newDate = add(date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})     
+                    const newDate = add(date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})
                     await Booking.findOneAndUpdate({order_id: order.id}, {$set: {time: newDate}}) 
                     return res.status(200).json("Cử nhân viên thành công")
                 } else {
