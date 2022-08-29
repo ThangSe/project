@@ -195,8 +195,7 @@ class ScheduleController {
                         const workSlot = await WorkSlot.findById(workSlotId)
                         const slot = await Slot.findById(workSlot.slot_id)
                         const schedule = await Schedule.findById(slot.schedule_id)
-                        const date = schedule.date
-                        const newDate = add(date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})     
+                        const newDate = await add(schedule.date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})     
                         await Booking.findOneAndUpdate({order_id: order.id}, {$set: {time: newDate}})              
                         return res.status(200).json("Cử nhân viên thành công")
                     }
@@ -210,8 +209,7 @@ class ScheduleController {
                     const workSlot = await WorkSlot.findById(workSlotId)
                     const slot = await Slot.findById(workSlot.slot_id)
                     const schedule = await Schedule.findById(slot.schedule_id)
-                    const date = schedule.date
-                    const newDate = add(date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})
+                    const newDate = await add(schedule.date, {hours: num2hour(slot.start)-7, minutes: num2minute(slot.start)})    
                     await Booking.findOneAndUpdate({order_id: order.id}, {$set: {time: newDate}}) 
                     return res.status(200).json("Cử nhân viên thành công")
                 } else {
