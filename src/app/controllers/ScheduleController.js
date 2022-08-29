@@ -1,6 +1,7 @@
 const parse = require('date-fns/parse')
 const formatInTimeZone = require('date-fns-tz/formatInTimeZone')
 const format = require('date-fns/format')
+const Booking = require('../models/Booking')
 const Schedule = require('../models/Schedule')
 const Slot = require('../models/Slot')
 const WorkSlot = require('../models/WorkSlot')
