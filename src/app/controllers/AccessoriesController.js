@@ -1,5 +1,4 @@
 const Accessory = require('../models/Accessory')
-const ServiceAccessory = require('../models/ServiceAccessory')
 const Supplier = require('../models/Supplier')
 const multer = require('multer')
 const {storage, fileFind, deletedFile} = require('../../config/db/upload')
@@ -17,27 +16,12 @@ class AccessoriesController {
     async showAllAccessoryByType(req, res) {
         try {
             const type = req.body.type
-            const serId = req.body.serviceId
-            const existedBridge = await ServiceAccessory.find({typeCom: type, _id: serId})
-            if(existedBridge){
-                const existedAccId = []
-                for(e of existedBridge) {
-                    existedAccId.push(accessory_id)
-                }
-                const accessories = await Accessory.find().where('_id').nin(existedAccId).populate({
-                    path: 'supplier_id',
-                    model: 'supplier',
-                    select: 'name'
-                })
-                res.status(200).json(accessories)
-            } else {
-                const accessories = await Accessory.find({type: type}).populate({
-                    path: 'supplier_id',
-                    model: 'supplier',
-                    select: 'name'
-                })
-                res.status(200).json(accessories)
-            }
+            const accessories = await Accessory.find({type: type}).populate({
+                path: 'supplier_id',
+                model: 'supplier',
+                select: 'name'
+            })
+            res.status(200).json(accessories)
         } catch (err) {
             res.status(500).json(err)
         }
@@ -120,32 +104,6 @@ class AccessoriesController {
                 await Accessory.findByIdAndUpdate({_id: AccessoryId}, {$set: {imgURL: URL}})
                 res.status(200).json('Tải ảnh thành công')   
             })    
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
-
-    async getImg(req, res) {
-        try {
-            await gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
-                // Check if file
-                if (!file || file.length === 0) {
-                  return res.status(404).json({
-                    err: 'Ảnh không tồn tại'
-                  });
-                }
-                
-                // Check if image
-                if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
-                  // Read output to browser
-                  const readstream = gridfsBucket.openDownloadStream(file._id);
-                  readstream.pipe(res)
-                } else {
-                  res.status(404).json({
-                    err: 'Không phải là ảnh'
-                  })
-                 }
-                })
         } catch (err) {
             res.status(500).json(err)
         }

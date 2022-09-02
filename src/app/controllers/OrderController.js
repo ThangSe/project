@@ -12,74 +12,6 @@ const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
 class OrderController {
     // GET order/test1
-    async showAllServiceToChoose(req, res) {    
-        try {
-            const typeCom = req.query.typeCom
-            const typeSer = req.query.typeSer
-            const hasAccessory = Boolean((req.query.hasAccessory || "").replace(/\s*(false|null|undefined|0)\s*/i, ""))
-            if(hasAccessory) {
-                var serviceAndAccessory
-                if(typeCom) {
-                    serviceAndAccessory = await ServiceAccessory.find({typeCom: typeCom}, 'service_id')
-                }else {
-                    serviceAndAccessory = await ServiceAccessory.find({}, 'service_id')
-                }
-                const service_id = []
-                for(const ser of serviceAndAccessory) {
-                    service_id.push(ser.service_id)
-                }
-                if(typeSer) {
-                    const service = await Service.find({type: typeSer}).where('_id').in(service_id).populate([
-                        {
-                            path: 'serHasAcc',
-                            model: 'serviceaccessory',
-                            select: 'accessory_id',
-                            populate: {
-                                path: 'accessory_id',
-                                model: 'accessory',
-                                select: 'name price type component description insurance supplier_id imgURL',
-                                populate: {
-                                    path: 'supplier_id',
-                                    model: 'supplier',
-                                    select: 'name'
-                                }
-                            }
-                        }
-                    ])
-                    res.status(200).json(service)
-                }else {
-                    const service = await Service.find().where('_id').in(service_id).populate([
-                        {
-                            path: 'serHasAcc',
-                            model: 'serviceaccessory',
-                            select: 'accessory_id',
-                            populate: {
-                                path: 'accessory_id',
-                                model: 'accessory',
-                                select: 'name price type component description insurance supplier_id imgURL',
-                                populate: {
-                                    path: 'supplier_id',
-                                    model: 'supplier',
-                                    select: 'name'
-                                }
-                            }
-                        }
-                    ])
-                    res.status(200).json(service)
-                }           
-            } else {
-                if(typeSer){
-                    const service = await Service.find({hasAccessory: hasAccessory, type: typeSer},  'name price type description')
-                    res.status(200).json(service)
-                }else {
-                    const service = await Service.find({hasAccessory: hasAccessory},  'name price type description')
-                    res.status(200).json(service)
-                }
-            }
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
     async viewOrderWithDetail(req, res) {
         try {
             const id = req.params.id
@@ -87,16 +19,16 @@ class OrderController {
                 {
                     path: 'orderDetails_id',
                     model: 'orderdetail',
-                    select: 'amount_ser price_after discount service_id accessories',
+                    select: 'amount_ser price_after discount service_id accessory_id amount_acc',
                     populate: [{
                         path: 'service_id',
                         model: 'service',
                         select: 'name price'
                     },
                     {
-                        path: 'accessories.accessory_id',
+                        path: 'accessory_id',
                         model: 'accessory',
-                        select: 'name price insurance'
+                        select: 'name price insurance imgURL'
                     }
                     ]
                 },
@@ -113,42 +45,24 @@ class OrderController {
     async viewDetailOrder(req, res) {
         try {
             const id = req.params.id
-            const cond = await OrderDetail.findById(id).populate([
+            const detailOrder = await OrderDetail.findById(id).populate([
                 {
                     path: 'service_id',
                     model: 'service',
-                    select: 'hasAccessory'
+                    select: 'name price'
+                },
+                {
+                    path: 'accessory_id',
+                    model: 'accessory',
+                    select: 'name price insurance supplier_id imgURL',
+                    populate: {
+                        path: 'supplier_id',
+                        model: 'supplier',
+                        select: 'name'
+                    }
                 }
             ])
-            if(cond.service_id.hasAccessory == true) {
-                const detailOrder = await OrderDetail.findById(id).populate([
-                    {
-                        path: 'service_id',
-                        model: 'service',
-                        select: 'name price'
-                    },
-                    {
-                        path: 'accessories.accessory_id',
-                        model: 'accessory',
-                        select: 'name price insurance supplier_id',
-                        populate: {
-                            path: 'supplier_id',
-                            model: 'supplier',
-                            select: 'name'
-                        }
-                    }
-                ])
-                res.status(200).json(detailOrder)
-            }else {
-                const detailOrder = await OrderDetail.findById(id).populate([
-                    {
-                        path: 'service_id',
-                        model: 'service',
-                        select: 'name price'
-                    }
-                ])
-                res.status(200).json(detailOrder)
-            }
+            res.status(200).json(detailOrder)
         } catch (err) {
             res.status(500).json(err)
         }
@@ -221,53 +135,28 @@ class OrderController {
             const datas = req.body.datas
             if(datas) {
                 for(const data of datas) {
-                    const hasAccessory = data.hasAccessory
-                    const discount = data.discount
-                    const listAccId = data.accessories
-                    const serId = data.serviceId
                     var priceAcc = 0
-                    if(hasAccessory) {
-                        const orderDetail = new OrderDetail({
-                            discount,
-                            service_id: serId,
-                            accessories: data.accessories
-                        })
-                        const saveOrderDetail = await orderDetail.save()
-                        listAccId.forEach(async function(e){
-                            if(e.accessory_id) {
-                                const accessory = await Accessory.findById(e.accessory_id)
-                                priceAcc+=(accessory.price*e.amount_acc)
-                                await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                            }
-                        })
-                        const service = await Service.findById(serId)
-                        if(service){
-                            await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})              
-                        }
-                        await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
-                        const totalPrice = (priceAcc + service.price)*(100-discount)/100
-                        await OrderDetail.findByIdAndUpdate(
-                            {_id: saveOrderDetail.id}, 
-                            {price_after: totalPrice, order_id: order.id, accessories: listAccId, service_id: service.id}, 
-                            {new: true}
-                        )
+                    var priceSer = 0
+                    const orderDetail = new OrderDetail({
+                        data
+                    })
+                    const saveOrderDetail = await orderDetail.save()
+                    if(data.accessoryId){
+                        const accessory = await Accessory.findById(data.accessoryId)
+                        await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                        priceAcc +=(accessory.price*saveOrderDetail.amount_acc)
                     }
-                    else {
-                        const orderDetail = new OrderDetail({
-                            discount,
-                            service_id: serId
-                        })
-                        const saveOrderDetail = await orderDetail.save()
-                        const service = await Service.findById(serId)
+                    if(data.serviceId){
+                        const service = await Service.findById(data.serviceId)
                         await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                        await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
-                        const totalPrice = service.price*(100-discount)/100
-                        await OrderDetail.findByIdAndUpdate(
-                            {_id: saveOrderDetail.id},
-                            {price_after: totalPrice, order_id: order.id, service_id: service.id}, 
-                            {new: true}
-                        )
+                        priceSer +=(service.price*saveOrderDetail.amount_ser)
                     }
+                    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                    const totalPrice = (priceAcc + priceSer)*(100-saveOrderDetail.discount)/100
+                    await OrderDetail.findByIdAndUpdate(
+                        {_id: saveOrderDetail.id}, 
+                        {price_after: totalPrice}
+                    )
                 }
                 await order.updateOne({$set: {status: 'Chờ xác nhận'}})
                 return res.status(200).json("Cập nhật thành công")
@@ -289,11 +178,7 @@ class OrderController {
             if(order.orderDetails_id){
                 for(const orderDetailId of order.orderDetails_id) {
                     const orderDetail = await OrderDetail.findById(orderDetailId)
-                    const accessories_id = []
-                    for(const accessory of orderDetail.accessories) {
-                        accessories_id.push(accessory.accessory_id)
-                    }
-                    await Accessory.updateMany({_id:{$in: accessories_id}}, {$pull: {orderdetail_id: orderDetailId}})
+                    await Accessory.findByIdAndUpdate({_id: orderDetail.accessory_id}, {$pull: {orderdetail_id: orderDetailId}})
                     await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
                     await OrderDetail.deleteOne({_id: orderDetailId})
                 }
@@ -449,7 +334,7 @@ class OrderController {
                 res.status(200).json(order)
             }
             else {
-                res.status(200).json("Khong tim thay don hang")
+                res.status(400).json("Không tìm thấy đơn hàng")
             }
         } catch (err) {
             res.status(500).json(err)
@@ -473,7 +358,7 @@ class OrderController {
                             select: 'name price hasAccessory'
                         },
                         {
-                            path: 'accessories.accessory_id',
+                            path: 'accessory_id',
                             model: 'accessory',
                             select: 'name price imgURL'
                         }
@@ -525,7 +410,7 @@ class OrderController {
                         select: 'name description type price hasAccessory'
                     },
                     {
-                        path: 'accessories.accessory_id',
+                        path: 'accessory_id',
                         model: 'accessory',
                         select: 'name description insurance price supplier_id',
                         populate:{

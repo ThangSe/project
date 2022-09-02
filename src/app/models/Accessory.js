@@ -14,9 +14,6 @@ const Accessory = new Schema({
     supplier_id: {type: mongoose.Schema.Types.ObjectId, ref:"supplier"},
     orderdetail_id: [
         {type: mongoose.Schema.Types.ObjectId, ref:"orderdetail"}
-    ],
-    serHasAcc: [
-        {type: mongoose.Schema.Types.ObjectId, ref:"serviceaccessory"}
     ]
 }, {
     timestamps: true,

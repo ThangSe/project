@@ -3,7 +3,6 @@ const orderController = require('../app/controllers/OrderController')
 const imgFunc = require("../config/db/upload")
 const middlewareController = require("../app/controllers/MiddlewareController")
 
-router.get('/show-service-to-choose', middlewareController.verifyTokenStaff, orderController.showAllServiceToChoose)
 router.get('/show/order-staff', middlewareController.verifyTokenStaff, orderController.showOrderForStaff)
 router.get('/show/history-order-staff', middlewareController.verifyTokenStaff, orderController.historyCompletedOrderForStaff)
 router.get('/order-with-detail/:id',orderController.viewOrderWithDetail)
