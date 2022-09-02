@@ -536,6 +536,7 @@ class OrderController {
         try {
             const order = await Order.findById(req.body.id)
             if(order.status == 'Hoàn tất hóa đơn'){
+                await WorkSlot.findByIdAndUpdate({_id: order.work_slot}, {status: 'open'})
                 await order.updateOne({$set: {status: 'Hoàn thành'}})
                 res.status(200).json("Đơn hàng đã hoàn thành")
             }

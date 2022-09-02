@@ -190,9 +190,9 @@ class ScheduleController {
                     else if(availableWorkSlot.status == "closed") {
                         return res.status(400).json("Nhân viên không còn làm việc ở slot này")
                     }else {
-                        await WorkSlot.findOneAndUpdate({order_id: order.id}, {$unset: {order_id: ""}, $set: {status: "open"}})
+                        await orderWorkSlot.updateOne({$pull: {order_id: order.id}, $set: {status: "open"}})
                         await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$push: {order_id: orderId}, $set: {status: "busy"}})
                         const workSlot = await WorkSlot.findById(workSlotId)
                         const slot = await Slot.findById(workSlot.slot_id)
                         const schedule = await Schedule.findById(slot.schedule_id)
@@ -206,7 +206,7 @@ class ScheduleController {
             } else {
                 if(availableWorkSlot.status == "open") {
                     await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
+                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$push: {order_id: orderId}, $set: {status: "busy"}})
                     const workSlot = await WorkSlot.findById(workSlotId)
                     const slot = await Slot.findById(workSlot.slot_id)
                     const schedule = await Schedule.findById(slot.schedule_id)
