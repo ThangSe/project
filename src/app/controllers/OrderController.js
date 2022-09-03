@@ -136,17 +136,15 @@ class OrderController {
                 for(const data of datas) {
                     var priceAcc = 0
                     var priceSer = 0
-                    const orderDetail = new OrderDetail({
-                        data
-                    })
+                    const orderDetail = new OrderDetail(data)
                     const saveOrderDetail = await orderDetail.save()
-                    if(data.accessoryId){
-                        const accessory = await Accessory.findById(data.accessoryId)
+                    if(data.accessory_id){
+                        const accessory = await Accessory.findById(data.accessory_id)
                         await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
                         priceAcc +=(accessory.price*saveOrderDetail.amount_acc)
                     }
-                    if(data.serviceId){
-                        const service = await Service.findById(data.serviceId)
+                    if(data.service_id){
+                        const service = await Service.findById(data.service_id)
                         await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
                         priceSer +=(service.price*saveOrderDetail.amount_ser)
                     }
@@ -177,8 +175,12 @@ class OrderController {
             if(order.orderDetails_id){
                 for(const orderDetailId of order.orderDetails_id) {
                     const orderDetail = await OrderDetail.findById(orderDetailId)
-                    await Accessory.findByIdAndUpdate({_id: orderDetail.accessory_id}, {$pull: {orderdetail_id: orderDetailId}})
-                    await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
+                    if(orderDetail.accessory_id) {
+                        await Accessory.findByIdAndUpdate({_id: orderDetail.accessory_id}, {$pull: {orderdetail_id: orderDetailId}})
+                    }
+                    if(orderDetail.service_id){
+                        await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
+                    }
                     await OrderDetail.deleteOne({_id: orderDetailId})
                 }
                 await order.updateOne({$unset:{orderDetails_id:1}})

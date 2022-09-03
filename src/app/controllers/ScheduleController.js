@@ -190,7 +190,7 @@ class ScheduleController {
                     else if(availableWorkSlot.status == "closed") {
                         return res.status(400).json("Nhân viên không còn làm việc ở slot này")
                     }else {
-                        await orderWorkSlot.updateOne({$unset: {order_id: ""}, $set: {status: "open"}})
+                        await orderWorkSlot.updateOne({$unset: {order_id: 1}, $set: {status: "open"}})
                         await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
                         await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}, $set: {status: "busy"}})
                         const workSlot = await WorkSlot.findById(workSlotId)
