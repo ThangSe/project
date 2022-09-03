@@ -1,6 +1,5 @@
 const Accessory = require('../models/Accessory')
 const Service = require('../models/Service')
-const ServiceAccessory = require('../models/ServiceAccessory')
 
 class ServiceController {
     //GET /service/all-service
@@ -21,14 +20,7 @@ class ServiceController {
                 res.status(404).json("Service is existed")
             }
             else {
-                const service = new Service({
-                    name: data.name,
-                    description: data.description,
-                    type: data.type,
-                    price: data.price,
-                    brand: data.brand,
-                    hasAccessory: data.hasAccessory
-                })
+                const service = new Service({})
                 const saveService = await service.save()
                 if(saveService.hasAccessory) {
                     for(const d of data.accessories) {

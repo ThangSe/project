@@ -3,7 +3,6 @@ const Order = require("../models/Order")
 const WorkSlot = require("../models/WorkSlot")
 const Service = require("../models/Service")
 const OrderDetail = require("../models/OrderDetail")
-const ServiceAccessory = require("../models/ServiceAccessory")
 const Accessory = require('../models/Accessory')
 const Computer = require('../models/Computer')
 const Buffer = require('buffer/').Buffer
