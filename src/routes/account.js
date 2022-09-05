@@ -7,7 +7,7 @@ router.get("/all/lastest-account", middlewareController.verifyTokenManager, acco
 router.get("/all", middlewareController.verifyTokenManager, accountController.getAllAccounts)
 router.get("/all-customer", middlewareController.verifyTokenManager, accountController.getAllCusAccount)
 router.get("/all-staff", middlewareController.verifyTokenManager, accountController.getAllStaffAccount)
-router.get("/all-manager", middlewareController.verifyTokenManager, accountController.getAllManagerAccount)
+router.get("/all-manager", middlewareController.verifyTokenAdmin, accountController.getAllManagerAccount)
 router.get("/account-with-detail", middlewareController.verifyTokenManager, accountController.getAllAccountsDetail)
 router.get("/view-profile", middlewareController.verifyToken, accountController.viewOwnedProfile)
 router.get("/view-booking-history", middlewareController.verifyToken, accountController.viewBookingHistory)
