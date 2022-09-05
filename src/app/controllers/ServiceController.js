@@ -41,7 +41,7 @@ class ServiceController {
             } else{
                 const filter = {_id: req.params.id}
                 const update = {$set: req.body}
-                await Accessory.findByIdAndUpdate(filter, update, {new: true})
+                await Service.findByIdAndUpdate(filter, update, {new: true})
                 res.status(200).json("Cập nhật dịch vụ thành công")
             }        
         } catch (err) {
