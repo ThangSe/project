@@ -56,7 +56,7 @@ class ServiceController {
     async getService(req,res) {
         try {
             const serviceId = req.params.id
-            const service= await Accessory.findById(serviceId)
+            const service= await Service.findById(serviceId)
             res.status(200).json(service)
         } catch (err) {
             res.status(500).json(err)
