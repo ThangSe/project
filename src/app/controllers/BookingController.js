@@ -318,12 +318,12 @@ class BookingController {
             const booking = await Booking.findById(req.body.id)
             if(booking.status == "Đang xử lí") {
                 await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
-                const order = new Order({})
+                const order = new Order()
                 const saveOrder = await order.save()
-                const updateOrder = await Order.findById(saveOrder.id)
-                await updateOrder.updateOne({$set: {booking_id: booking.id}})
+                console.log(saveOrder)
+                const updateOrder = await Order.findByIdAndUpdate({_id: saveOrder.id},{$set: {booking_id: booking.id}}, {new: true})
                 await booking.updateOne({$set: {order_id: saveOrder.id}})
-                res.status(200).json(saveOrder)
+                res.status(200).json(updateOrder)
             } else {
                 res.status(500).json("Lịch hẹn này đã được cập nhật")
             }      

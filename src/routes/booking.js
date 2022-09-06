@@ -9,7 +9,7 @@ router.get('/search/:id', middlewareController.verifyTokenStaff, bookingControll
 router.post('/create', middlewareController.verifyToken, bookingController.createBookingCustomer)
 router.post('/create-booking-manager', middlewareController.verifyTokenManager, bookingController.createBookingManager)
 router.put('/update/:id', middlewareController.verifyToken, bookingController.updateBookingByIdForCus)
-router.patch('/accpet-booking', middlewareController.verifyTokenManager, bookingController.acceptBooking)
+router.patch('/accept-booking', middlewareController.verifyTokenManager, bookingController.acceptBooking)
 router.patch('/cancel-booking', middlewareController.verifyToken, bookingController.cancelBooking)
 router.get('/booking-by-id/:id', middlewareController.verifyTokenManager, bookingController.showAllBookingByCusId)
 router.get('/:id', middlewareController.verifyToken, bookingController.getBookingByIdForCus)
