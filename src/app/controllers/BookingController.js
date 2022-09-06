@@ -318,7 +318,7 @@ class BookingController {
             const booking = await Booking.findById(req.body.id)
             if(booking.status == "Đang xử lí") {
                 await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
-                const order = new Order()
+                const order = new Order({})
                 const saveOrder = await order.save()
                 const updateOrder = await Order.findById(saveOrder.id)
                 await updateOrder.updateOne({$set: {booking_id: booking.id}})
