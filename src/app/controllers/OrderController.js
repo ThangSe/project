@@ -136,7 +136,7 @@ class OrderController {
                 for(const data of datas) {
                     var priceAcc = 0
                     var priceSer = 0
-                    if(order.orderDetails_id) {
+                    if(order.orderDetails_id.length > 0) {
                         for (var item of order.orderDetails_id){
                             if(data.accessory_id == item.accessory_id) {
                                 const accessory = await Accessory.findById(item.accessory_id)
