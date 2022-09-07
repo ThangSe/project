@@ -219,7 +219,6 @@ class OrderController {
             if(orderDetail.service_id){
                 await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetail.id}})
             }
-            console.log("here")
             await Order.findByIdAndUpdate({_id: orderDetail.order_id}, {$pull: {orderDetails_id: orderDetail.id}})
             await OrderDetail.deleteOne({_id: orderDetail.id})
             res.status(200).json("Xóa thành công")
