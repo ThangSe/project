@@ -9,6 +9,29 @@ const Buffer = require('buffer/').Buffer
 const multer = require('multer')
 const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 
+const addNewData = async (data, order) => {
+    var priceAcc = 0
+    var priceSer = 0
+    const orderDetail = new OrderDetail(data)
+    const saveOrderDetail = await orderDetail.save()
+    if(data.accessory_id){
+        const accessory = await Accessory.findById(data.accessory_id)
+        await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+        priceAcc +=(accessory.price*saveOrderDetail.amount_acc)
+    }
+    if(data.service_id){
+        const service = await Service.findById(data.service_id)
+        await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+        priceSer +=(service.price*saveOrderDetail.amount_ser)
+    }
+    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+    const totalPrice = (priceAcc + priceSer)*(100-saveOrderDetail.discount)/100
+    await OrderDetail.findByIdAndUpdate(
+        {_id: saveOrderDetail.id}, 
+        {$set: {price_after: totalPrice, order_id: order.id}}
+)
+}
+
 class OrderController {
     // GET order/test1
     async viewOrderWithDetail(req, res) {
@@ -126,8 +149,6 @@ class OrderController {
             res.status(500).json(err)
         }
     }
-
-    //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
             const order = await Order.findById(req.params.id).populate([
@@ -138,39 +159,41 @@ class OrderController {
             ])
             const datas = req.body.datas
             if(datas) {
-                for(const data of datas) {
-                    var priceAcc = 0
-                    var priceSer = 0
-                    if(order.orderDetails_id.length > 0) {               
+                for(const data of datas) {                   
+                    if(order.orderDetails_id.length > 0) {
+                        var existedList = [] 
                         for (var item of order.orderDetails_id){
-                            if(data.accessory_id == item.accessory_id && item.accessory_id) {
-                                const accessory = await Accessory.findById(item.accessory_id)
-                                await OrderDetail.findByIdAndUpdate({_id: item.id}, {$inc: {amount_acc: data.amount_acc, price_after: accessory.price*data.amount_acc*(100-item.discount)/100}})
+                            if(item.accessory_id){
+                                existedList.push(item.accessory_id.toString())
                             }
-                            if(data.service_id == item.service_id && item.service_id) {
-                                const service = await Service.findById(item.service_id)
-                                await OrderDetail.findByIdAndUpdate({_id: item.id}, {$inc: {amount_ser: data.amount_ser, price_after: service.price*data.amount_ser*(100-item.discount)/100}})
-                            }
+                            if(item.service_id) {
+                                existedList.push(item.service_id.toString())
+                            }                                                
                         }
-                    } else {
-                        const orderDetail = new OrderDetail(data)
-                        const saveOrderDetail = await orderDetail.save()
-                        if(data.accessory_id){
+                        if(data.accessory_id && existedList.includes(data.accessory_id)) {
                             const accessory = await Accessory.findById(data.accessory_id)
-                            await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                            priceAcc +=(accessory.price*saveOrderDetail.amount_acc)
+                            await OrderDetail.findOneAndUpdate({$and: [
+                                {accessory_id: accessory.id},
+                                {order_id: order.id}
+                            ]},  
+                            {$inc: {amount_acc: data.amount_acc, price_after: accessory.price*data.amount_acc*(100-item.discount)/100}})
                         }
-                        if(data.service_id){
+                        else if(data.service_id && existedList.includes(data.service_id)) {
                             const service = await Service.findById(data.service_id)
-                            await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                            priceSer +=(service.price*saveOrderDetail.amount_ser)
-                        }
-                        await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
-                        const totalPrice = (priceAcc + priceSer)*(100-saveOrderDetail.discount)/100
-                        await OrderDetail.findByIdAndUpdate(
-                            {_id: saveOrderDetail.id}, 
-                            {price_after: totalPrice}
-                    )
+                            const orderDetail = await OrderDetail.findOne({$and: [
+                                {service_id: service.id},
+                                {order_id: order.id}
+                            ]})
+                            await OrderDetail.findOneAndUpdate({$and: [
+                                {service_id: service.id},
+                                {order_id: order.id}
+                            ]}, 
+                            {$inc: {amount_ser: data.amount_ser, price_after: service.price*data.amount_ser*(100-item.discount)/100}})
+                        } else {
+                            addNewData(data, order)
+                        }                           
+                    } else {
+                        addNewData(data, order)
                     }              
                 }
                 await order.updateOne({$set: {status: 'Chờ xác nhận'}})
@@ -187,7 +210,7 @@ class OrderController {
         }
     }
 
-    async deleteDetailOrder(req, res, next) {
+    async deleteDetailOrder(req, res) {
         try {
             const orderDetail = await OrderDetail.findById(req.params.id)
             if(orderDetail.accessory_id) {
@@ -196,7 +219,8 @@ class OrderController {
             if(orderDetail.service_id){
                 await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetail.id}})
             }
-            await Order.findByIdAndUpdate({_id: orderDetail.order_id},{$unset:{orderDetails_id:1}})
+            console.log("here")
+            await Order.findByIdAndUpdate({_id: orderDetail.order_id}, {$pull: {orderDetails_id: orderDetail.id}})
             await OrderDetail.deleteOne({_id: orderDetail.id})
             res.status(200).json("Xóa thành công")
         } catch (err) {
