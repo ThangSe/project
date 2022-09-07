@@ -130,30 +130,43 @@ class OrderController {
     //POST /order/addDetailOrder/:id
     async addDetailOrder(req, res) {
         try {
-            const order = await Order.findById(req.params.id)
+            const order = await Order.findById(req.params.id).populate("orderDetails_id")
             const datas = req.body.datas
             if(datas) {
                 for(const data of datas) {
                     var priceAcc = 0
                     var priceSer = 0
-                    const orderDetail = new OrderDetail(data)
-                    const saveOrderDetail = await orderDetail.save()
-                    if(data.accessory_id){
-                        const accessory = await Accessory.findById(data.accessory_id)
-                        await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                        priceAcc +=(accessory.price*saveOrderDetail.amount_acc)
-                    }
-                    if(data.service_id){
-                        const service = await Service.findById(data.service_id)
-                        await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
-                        priceSer +=(service.price*saveOrderDetail.amount_ser)
-                    }
-                    await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
-                    const totalPrice = (priceAcc + priceSer)*(100-saveOrderDetail.discount)/100
-                    await OrderDetail.findByIdAndUpdate(
-                        {_id: saveOrderDetail.id}, 
-                        {price_after: totalPrice}
+                    if(order.orderDetails_id) {
+                        for (var item of order.orderDetails_id){
+                            if(data.accessory_id == item.accessory_id) {
+                                const accessory = await Accessory.findById(item.accessory_id)
+                                await item.updateOne({$inc: {amount_acc: data.amount_acc, price_after: accessory.price*data.amount_acc*(100-item.discount)/100}})
+                            }
+                            if(data.service_id == item.service_id) {
+                                const service = await Service.findById(item.service_id)
+                                await item.updateOne({$inc: {amount_ser: data.amount_ser, price_after: service.price*data.amount_ser*(100-item.discount)/100}})
+                            }
+                        }
+                    } else {
+                        const orderDetail = new OrderDetail(data)
+                        const saveOrderDetail = await orderDetail.save()
+                        if(data.accessory_id){
+                            const accessory = await Accessory.findById(data.accessory_id)
+                            await accessory.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                            priceAcc +=(accessory.price*saveOrderDetail.amount_acc)
+                        }
+                        if(data.service_id){
+                            const service = await Service.findById(data.service_id)
+                            await service.updateOne({$push: {orderdetail_id: saveOrderDetail.id}})
+                            priceSer +=(service.price*saveOrderDetail.amount_ser)
+                        }
+                        await order.updateOne({$push: {orderDetails_id: saveOrderDetail.id}})
+                        const totalPrice = (priceAcc + priceSer)*(100-saveOrderDetail.discount)/100
+                        await OrderDetail.findByIdAndUpdate(
+                            {_id: saveOrderDetail.id}, 
+                            {price_after: totalPrice}
                     )
+                    }              
                 }
                 await order.updateOne({$set: {status: 'Chờ xác nhận'}})
                 return res.status(200).json("Cập nhật thành công")
@@ -178,7 +191,7 @@ class OrderController {
             if(orderDetail.service_id){
                 await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetail.id}})
             }
-            await Order.findByIdAndUpdate({_id: OrderDetail.order_id},{$unset:{orderDetails_id:1}})
+            await Order.findByIdAndUpdate({_id: orderDetail.order_id},{$unset:{orderDetails_id:1}})
             await OrderDetail.deleteOne({_id: orderDetail.id})
             res.status(200).json("Xóa thành công")
         } catch (err) {
