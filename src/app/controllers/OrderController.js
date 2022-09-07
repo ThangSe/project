@@ -169,25 +169,18 @@ class OrderController {
         }
     }
 
-    async deleteAllDetailOrder(req, res, next) {
+    async deleteDetailOrder(req, res, next) {
         try {
-            const order = await Order.findById(req.params.id)
-            if(order.orderDetails_id){
-                for(const orderDetailId of order.orderDetails_id) {
-                    const orderDetail = await OrderDetail.findById(orderDetailId)
-                    if(orderDetail.accessory_id) {
-                        await Accessory.findByIdAndUpdate({_id: orderDetail.accessory_id}, {$pull: {orderdetail_id: orderDetailId}})
-                    }
-                    if(orderDetail.service_id){
-                        await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetailId}})
-                    }
-                    await OrderDetail.deleteOne({_id: orderDetailId})
-                }
-                await order.updateOne({$unset:{orderDetails_id:1}})
-                next()
-            } else {
-                next()
+            const orderDetail = await OrderDetail.findById(req.params.id)
+            if(orderDetail.accessory_id) {
+                await Accessory.findByIdAndUpdate({_id: orderDetail.accessory_id}, {$pull: {orderdetail_id: orderDetail.id}})
             }
+            if(orderDetail.service_id){
+                await Service.findByIdAndUpdate({_id: orderDetail.service_id}, {$pull: {orderdetail_id: orderDetail.id}})
+            }
+            await Order.findByIdAndUpdate({_id: OrderDetail.order_id},{$unset:{orderDetails_id:1}})
+            await OrderDetail.deleteOne({_id: orderDetail.id})
+            res.status(200).json("Xóa thành công")
         } catch (err) {
             res.status(500).json(err)
         }
