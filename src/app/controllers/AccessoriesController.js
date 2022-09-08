@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const Accessory = require('../models/Accessory')
 const Supplier = require('../models/Supplier')
 const multer = require('multer')
@@ -131,49 +132,32 @@ class AccessoriesController {
     async getAllAccessoryForCus(req, res) {
         try {
             //sort by price
-            const {page = 1, limit = 20, sort, name, type} = req.query
-            let accessories = await Accessory.find().limit(limit * 1).skip((page - 1) * limit)
+            const {page = 1, limit = 20, sort = 1, name, type, isHot = "asc"} = req.query
+            let accessories
             let count = await Accessory.find().count()/10
-            if(sort && name && type) {
-                if(sort == "desc") {
-                    accessories = await Accessory.find({type: type, name : { $regex: name, $options: 'i'}}).sort({price: -1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }else {
-                    accessories = await Accessory.find({type: type, name : { $regex: name, $options: 'i'}}).sort({price: 1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }
-            }else if(sort && type) {
-                if(sort == "desc") {
-                    accessories = await Accessory.find({type: type}).sort({price: -1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }else {
-                    accessories = await Accessory.find({type: type}).sort({price: 1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }
-            }else if(sort && name) {
-                if(sort == "desc") {
-                    accessories = await Accessory.find({name : { $regex: name, $options: 'i'}}).sort({price: -1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }else {
-                    accessories = await Accessory.find({name : { $regex: name, $options: 'i'}}).sort({price: 1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }
-            }else if(sort) {
-                if(sort == "desc") {
-                    accessories = await Accessory.find().sort({price: -1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }else {
-                    accessories = await Accessory.find().sort({price: 1}).limit(limit * 1).skip((page - 1) * limit)
-                    return res.status(200).json({count: Math.ceil(count), accessories})
-                }
+            const isHotAcc = (accessories) => {
+                const a = _.orderBy(accessories, ['accessory', function(o) {
+                    return o.orderdetail_id.length
+                }], ["asc", isHot])
+                return a
+            }
+            let sortedAcc
+            if(name && type) {
+                accessories = await Accessory.find({type: type, name : { $regex: name, $options: 'i'}}).sort({price: sort, orderdetail_id: isHot}).limit(limit * 1).skip((page - 1) * limit)
+                sortedAcc = isHotAcc(accessories)
+                return res.status(200).json({count: Math.ceil(count), sortedAcc})
             }else if(name) {
-                accessories = await Accessory.find({name : { $regex: name, $options: 'i'}}).sort({price: 1}).limit(limit * 1).skip((page - 1) * limit)
-                return res.status(200).json({count: Math.ceil(count), accessories})
+                accessories = await Accessory.find({name : { $regex: name, $options: 'i'}}).sort({price: sort, orderdetail_id: isHot}).limit(limit * 1).skip((page - 1) * limit)
+                sortedAcc = isHotAcc(accessories)
+                return res.status(200).json({count: Math.ceil(count), sortedAcc})
             }else if(type){
-                accessories = await Accessory.find({type: type}).sort({price: 1}).limit(limit * 1).skip((page - 1) * limit)
-                return res.status(200).json({count: Math.ceil(count), accessories})
+                accessories = await Accessory.find({type: type}).sort({price: sort, orderdetail_id: isHot}).limit(limit * 1).skip((page - 1) * limit)
+                sortedAcc = isHotAcc(accessories)
+                return res.status(200).json({count: Math.ceil(count), sortedAcc})
             }else{
-                return res.status(200).json({count: Math.ceil(count), accessories})
+                accessories = await Accessory.find().sort({price: sort, orderdetail_id: isHot}).limit(limit * 1).skip((page - 1) * limit)
+                sortedAcc = isHotAcc(accessories)
+                return res.status(200).json({count: Math.ceil(count), sortedAcc})
             }
         } catch (err) {
             res.status(500).json(err)
