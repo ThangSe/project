@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require('lodash')
 const Order = require("../models/Order")
 const WorkSlot = require("../models/WorkSlot")
 const Service = require("../models/Service")
@@ -171,7 +171,6 @@ class OrderController {
                     }
                 }
                 for(const data of datas) {
-                    console.log("here2")
                     if(data.accessory_id && existedList.includes(data.accessory_id)) {
                         const orderDetail = await OrderDetail.findOne({$and: [
                             {accessory_id: data.accessory_id},
@@ -437,7 +436,7 @@ class OrderController {
                         populate: {
                             path: 'user_id',
                             model: 'user',
-                            select: ' name'
+                            select: ' name phonenum'
                         }
                     }
                 },
