@@ -136,9 +136,9 @@ class AccessoriesController {
             let accessories
             let count = await Accessory.find().count()/10
             const isHotAcc = (accessories) => {
-                const a = _.orderBy(accessories, ['price', function(o) {
-                    return o.orderdetail_id.length
-                }], [sort, isHot])
+                const a = _.orderBy(accessories, [function(accessory) {
+                    return accessory.orderdetail_id.length
+                }, 'price'], [isHot, sort])
                 return a
             }
             let sortedAcc
