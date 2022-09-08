@@ -159,36 +159,55 @@ class OrderController {
             ])
             const datas = req.body.datas
             if(datas) {
-                for(const data of datas) {                   
-                    if(order.orderDetails_id.length > 0) {
-                        var existedList = [] 
-                        for (var item of order.orderDetails_id){
-                            if(item.accessory_id){
-                                existedList.push(item.accessory_id.toString())
-                            }
-                            if(item.service_id) {
-                                existedList.push(item.service_id.toString())
-                            }                                                
+                var existedList = []
+                if(order.orderDetails_id.length > 0) {                 
+                    for(const item of order.orderDetails_id) {
+                        if(item.accessory_id) {
+                            existedList.push(item.accessory_id.toString())
                         }
+                        if(item.service_id) {
+                            existedList.push(item.service_id.toString())
+                        }
+                    }
+                }
+                for(const data of datas) {
+                    console.log("here2")
+                    if(data.accessory_id && existedList.includes(data.accessory_id)) {
+                        const orderDetail = await OrderDetail.findOne({$and: [
+                            {accessory_id: data.accessory_id},
+                            {order_id: order.id}
+                        ]})
+                        if(orderDetail.amount_acc !=0) {
+                            await orderDetail.updateOne({$set:{amount_acc: 0, price_after: 0}})
+                        }
+                    }
+                    if(data.service_id && existedList.includes(data.service_id)) {
+                        const orderDetail = await OrderDetail.findOne({$and: [
+                            {service_id: data.service_id},
+                            {order_id: order.id}
+                        ]})
+                        if(orderDetail.amount_ser !=0) {
+                            await orderDetail.updateOne({$set:{amount_ser: 0, price_after: 0}})
+                        }
+                    }
+                }
+                for(const data of datas) {                                 
+                    if(order.orderDetails_id.length > 0) {
                         if(data.accessory_id && existedList.includes(data.accessory_id)) {
                             const accessory = await Accessory.findById(data.accessory_id)
                             await OrderDetail.findOneAndUpdate({$and: [
                                 {accessory_id: accessory.id},
                                 {order_id: order.id}
                             ]},  
-                            {$inc: {amount_acc: data.amount_acc, price_after: accessory.price*data.amount_acc*(100-item.discount)/100}})
+                            {$inc: {amount_acc: data.amount_acc, price_after: accessory.price*data.amount_acc*(100-data.discount)/100}})
                         }
                         else if(data.service_id && existedList.includes(data.service_id)) {
-                            const service = await Service.findById(data.service_id)
-                            const orderDetail = await OrderDetail.findOne({$and: [
-                                {service_id: service.id},
-                                {order_id: order.id}
-                            ]})
+                            const service = await Service.findById(data.service_id) 
                             await OrderDetail.findOneAndUpdate({$and: [
                                 {service_id: service.id},
                                 {order_id: order.id}
                             ]}, 
-                            {$inc: {amount_ser: data.amount_ser, price_after: service.price*data.amount_ser*(100-item.discount)/100}})
+                            {$inc: {amount_ser: data.amount_ser, price_after: service.price*data.amount_ser*(100-data.discount)/100}})
                         } else {
                             addNewData(data, order)
                         }                           
