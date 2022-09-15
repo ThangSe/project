@@ -12,7 +12,6 @@ const Accessory = new Schema({
     insurance: {type: String, required: [true, 'Bạn phải nhập hạn bảo hành cho linh kiện']},
     imgURL: {type: String},
     supplier_id: {type: mongoose.Schema.Types.ObjectId, ref:"supplier"},
-    deleted: {type: Boolean, default: false},
     orderdetail_id: [
         {type: mongoose.Schema.Types.ObjectId, ref:"orderdetail"}
     ]
