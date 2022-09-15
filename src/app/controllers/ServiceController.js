@@ -3,19 +3,28 @@ const Service = require('../models/Service')
 
 class ServiceController {
     //GET /service/all-service
-    showAllService(req, res, next) {
-        Service.find({})
-         .then(services => {
-             res.json(services)
-         })
-         .catch(next)
+    async showAllService(req, res) {
+        try {
+            const token = req.headers.token
+            const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
+            const acc_role = accountInfo.role
+            if(acc_role == 'customer' || acc_role == 'staff') {
+                const services = await Service.find()
+                res.status(200).json(services)
+            } else {
+                const services = await Service.findWithDeleted()
+                res.status(200).json(services)
+            }
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 
     //POST /service/create-service
     async createNewService(req, res) {
         try {
             const data = req.body
-            const existedService = await Service.findOne({name: data.name})
+            const existedService = await Service.findOneWithDeleted({name: data.name})
             if(existedService) {
                 res.status(404).json("Service is existed")
             }
@@ -65,8 +74,13 @@ class ServiceController {
 
     async deleteService(req, res) {
         try {
-            await Service.delete({name: req.body.name})
-            res.status(200).json("Xóa dịch vụ thành công")
+            const existedService = await Service.findOne({name: req.body.name})
+            if(existedService) {
+                await existedService.delete()
+                res.status(200).json("Xóa dịch vụ thành công")
+            } else {
+                res.status(400).json("Linh kiện không còn tồn tại")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
@@ -74,8 +88,13 @@ class ServiceController {
 
     async restoreService(req, res) {
         try {
-            await Service.restore({name: req.body.name})
-            res.status(200),json("Khôi phục dữ liệu thành công")
+            const existedService = await Service.findOne({name: req.body.name})
+            if(existedService) {
+                res.status(400).json("Dịch vụ vẫn còn tồn tại")
+            } else {
+                await Service.restore({name: req.body.name})
+                res.status(200).json("Khôi phục dữ liệu thành công")
+            }
         } catch (err) {
             res.status(500).json(err)
         }

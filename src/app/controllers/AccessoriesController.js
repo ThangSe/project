@@ -7,7 +7,7 @@ const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 class AccessoriesController {
     //GET /accessory/all-accessories
     showAllAccessory(req, res, next) {
-        Accessory.find({}).populate("supplier_id")
+        Accessory.findWithDeleted().populate("supplier_id")
         .then(accessories => {
             res.json(accessories)
         })
@@ -32,7 +32,7 @@ class AccessoriesController {
     async createNewAccessory(req, res) {
         try {
             const name = req.body.name
-            const existedAccessory = await Accessory.findOne({name: name})
+            const existedAccessory = await Accessory.findOneWithDeleted({name: name})
             if(existedAccessory) {
                 res.status(404).json("Linh kiện đã tồn tại. Xin thử lại")
             }
@@ -181,8 +181,13 @@ class AccessoriesController {
     }
     async deleteAccessory(req, res) {
         try {
-            await Accessory.delete({name: req.body.name})
-            res.status(200).json("Xóa linh kiện thành công")
+            const existedAccessory = await Accessory.findOne({name: req.body.name})
+            if(existedAccessory) {
+                await existedAccessory.delete()
+                res.status(200).json("Xóa linh kiện thành công")
+            } else {
+                res.status(400).json("Linh kiện không còn tồn tại")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
@@ -190,8 +195,13 @@ class AccessoriesController {
 
     async restoreAccessory(req, res) {
         try {
-            await Accessory.restore({name: req.body.name})
-            res.status(200),json("Khôi phục dữ liệu thành công")
+            const existedAccessory = await Accessory.findOne({name: req.body.name})
+            if(existedAccessory) {
+                res.status(400).json("Linh kiện vẫn còn tồn tại")
+            } else {
+                await Accessory.restore({name: req.body.name})
+                res.status(200).json("Khôi phục dữ liệu thành công")
+            }
         } catch (err) {
             res.status(500).json(err)
         }
