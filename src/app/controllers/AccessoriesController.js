@@ -8,10 +8,10 @@ class AccessoriesController {
     //GET /accessory/all-accessories
     showAllAccessory(req, res, next) {
         Accessory.find({}).populate("supplier_id")
-         .then(accessories => {
-             res.json(accessories)
-         })
-         .catch(next)
+        .then(accessories => {
+            res.json(accessories)
+        })
+        .catch(next)
     }
     
     async showAllAccessoryByType(req, res) {
@@ -175,6 +175,23 @@ class AccessoriesController {
                 await Accessory.findByIdAndUpdate(filter, update, {new: true})
                 res.status(200).json("Cập nhật linh kiện thành công")
             }        
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+    async deleteAccessory(req, res) {
+        try {
+            await Accessory.delete({name: req.body.name})
+            res.status(200).json("Xóa linh kiện thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async restoreAccessory(req, res) {
+        try {
+            await Accessory.restore({name: req.body.name})
+            res.status(200),json("Khôi phục dữ liệu thành công")
         } catch (err) {
             res.status(500).json(err)
         }

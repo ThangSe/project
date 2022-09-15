@@ -62,6 +62,24 @@ class ServiceController {
             res.status(500).json(err)
         }
     }
+
+    async deleteService(req, res) {
+        try {
+            await Service.delete({name: req.body.name})
+            res.status(200).json("Xóa dịch vụ thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
+    async restoreService(req, res) {
+        try {
+            await Service.restore({name: req.body.name})
+            res.status(200),json("Khôi phục dữ liệu thành công")
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
  
 }
 

@@ -8,6 +8,8 @@ router.get("/all-accessories-for-customer", middlewareController.verifyToken, ac
 router.get("/all-accessories-by-type", middlewareController.verifyToken, accessoriesController.showAllAccessoryByType)
 router.post("/new-accessory", middlewareController.verifyTokenManager, accessoriesController.createNewAccessory)
 router.post("/new-supplier", middlewareController.verifyTokenManager, accessoriesController.createSupplier)
+router.patch("/restored-accessory", middlewareController.verifyTokenManager,  accessoriesController.restoreAccessory)
+router.delete("deleted-accessory", middlewareController.verifyTokenManager, accessoriesController.deleteAccessory)
 router.get("/accessory-img/:filename", imgFunc.getImg)
 router.post("/upload-img/:id", middlewareController.verifyTokenManager, accessoriesController.deleteImgAccessories, accessoriesController.updateImgAccessories)
 router.get("/detail-accessory/:id", middlewareController.verifyTokenStaff, accessoriesController.getAccessory)
