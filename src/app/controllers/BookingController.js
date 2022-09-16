@@ -320,7 +320,6 @@ class BookingController {
                 await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
                 const order = new Order()
                 const saveOrder = await order.save()
-                console.log(saveOrder)
                 const updateOrder = await Order.findByIdAndUpdate({_id: saveOrder.id},{$set: {booking_id: booking.id}}, {new: true})
                 await booking.updateOne({$set: {order_id: saveOrder.id}})
                 res.status(200).json(updateOrder)
