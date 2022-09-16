@@ -460,7 +460,7 @@ class OrderController {
                     {
                         path: 'service_id',
                         model: 'service',
-                        select: 'name description type price hasAccessory'
+                        select: 'name description type price'
                     },
                     {
                         path: 'accessory_id',

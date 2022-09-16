@@ -192,7 +192,7 @@ class ScheduleController {
                     }else {
                         await orderWorkSlot.updateOne({$unset: {order_id: 1}, $set: {status: "open"}})
                         await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}, $set: {status: "busy"}})
+                        await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
                         const workSlot = await WorkSlot.findById(workSlotId)
                         const slot = await Slot.findById(workSlot.slot_id)
                         const schedule = await Schedule.findById(slot.schedule_id)
@@ -206,7 +206,7 @@ class ScheduleController {
             } else {
                 if(availableWorkSlot.status == "open") {
                     await Order.findByIdAndUpdate({_id: orderId}, {$set: {work_slot: workSlotId, status: 'Đang xử lí'}})
-                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId}, $set: {status: "busy"}})
+                    await WorkSlot.findByIdAndUpdate({_id: workSlotId}, {$set: {order_id: orderId, status: "busy"}})
                     const workSlot = await WorkSlot.findById(workSlotId)
                     const slot = await Slot.findById(workSlot.slot_id)
                     const schedule = await Schedule.findById(slot.schedule_id)
