@@ -170,10 +170,14 @@ class AccessoriesController {
             if(existedAccessory && existedAccessory.id != req.params.id) {
                 res.status(400).json("Tên linh kiện đã tồn tại")
             } else{
-                const filter = {_id: req.params.id}
                 const update = {$set: req.body}
-                await Accessory.findByIdAndUpdate(filter, update, {new: true})
-                res.status(200).json("Cập nhật linh kiện thành công")
+                const accessory = await Accessory.findById(req.params.id)
+                if(accessory){
+                    await accessory.updateOne(update)
+                    res.status(200).json("Cập nhật linh kiện thành công")
+                }else {
+                    res.status(400).json("Linh kiện không còn khả dụng")
+                }
             }        
         } catch (err) {
             res.status(500).json(err)
@@ -196,7 +200,7 @@ class AccessoriesController {
                 await existedAccessory.delete()
                 res.status(200).json("Xóa linh kiện thành công")
             } else {
-                res.status(400).json("Linh kiện không tồn tại")
+                res.status(400).json("Linh kiện không hoạt động")
             }
         } catch (err) {
             res.status(500).json(err)
@@ -207,7 +211,7 @@ class AccessoriesController {
         try {
             const existedAccessory = await Accessory.findById(req.params.id)
             if(existedAccessory) {
-                res.status(400).json("Linh kiện vẫn còn tồn tại")
+                res.status(400).json("Linh kiện vẫn còn hoạt động")
             } else {
                 await Accessory.restore({_id: req.params.id})
                 res.status(200).json("Khôi phục dữ liệu thành công")

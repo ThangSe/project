@@ -45,12 +45,14 @@ class OrderController {
                     populate: [{
                         path: 'service_id',
                         model: 'service',
-                        select: 'name price'
+                        select: 'name price',
+                        options: { withDeleted: true }
                     },
                     {
                         path: 'accessory_id',
                         model: 'accessory',
-                        select: 'name price insurance imgURL'
+                        select: 'name price insurance imgURL',
+                        options: { withDeleted: true }
                     }
                     ]
                 },
@@ -71,12 +73,14 @@ class OrderController {
                 {
                     path: 'service_id',
                     model: 'service',
-                    select: 'name price'
+                    select: 'name price',
+                    options: { withDeleted: true }
                 },
                 {
                     path: 'accessory_id',
                     model: 'accessory',
                     select: 'name price insurance supplier_id imgURL',
+                    options: { withDeleted: true },
                     populate: {
                         path: 'supplier_id',
                         model: 'supplier',
@@ -408,12 +412,14 @@ class OrderController {
                         {
                             path: 'service_id',
                             model: 'service',
-                            select: 'name price hasAccessory'
+                            select: 'name price hasAccessory',
+                            options: { withDeleted: true }
                         },
                         {
                             path: 'accessory_id',
                             model: 'accessory',
-                            select: 'name price imgURL'
+                            select: 'name price imgURL',
+                            options: { withDeleted: true }
                         }
                     ]
                 },
@@ -460,12 +466,14 @@ class OrderController {
                     {
                         path: 'service_id',
                         model: 'service',
-                        select: 'name description type price'
+                        select: 'name description type price',
+                        options: { withDeleted: true }
                     },
                     {
                         path: 'accessory_id',
                         model: 'accessory',
                         select: 'name description insurance price supplier_id',
+                        options: { withDeleted: true },
                         populate:{
                                 path: 'supplier_id',
                                 model: 'supplier',

@@ -48,10 +48,14 @@ class ServiceController {
             if(existedService && existedService.id != req.params.id) {
                 res.status(400).json("Tên dịch vụ đã tồn tại")
             } else{
-                const filter = {_id: req.params.id}
                 const update = {$set: req.body}
-                await Service.findByIdAndUpdate(filter, update, {new: true})
-                res.status(200).json("Cập nhật dịch vụ thành công")
+                const service = await Service.findById(req.params.id)
+                if(service){
+                    await service.updateOne(update)
+                    res.status(200).json("Cập nhật dịch vụ thành công")
+                }else {
+                    res.status(400).json("Dịch vụ không còn khả dụng")
+                }
             }        
         } catch (err) {
             if(err.name === "ValidationError") {
@@ -88,7 +92,7 @@ class ServiceController {
                 await existedService.delete()
                 res.status(200).json("Xóa dịch vụ thành công")
             } else {
-                res.status(400).json("Dịch vụ không tồn tại")
+                res.status(400).json("Dịch vụ không hoạt động")
             }
         } catch (err) {
             res.status(500).json(err)
@@ -99,7 +103,7 @@ class ServiceController {
         try {
             const existedService = await Service.findById(req.params.id)
             if(existedService) {
-                res.status(400).json("Dịch vụ vẫn còn tồn tại")
+                res.status(400).json("Dịch vụ vẫn còn hoạt động")
             } else {
                 await Service.restore({_id: req.params.id})
                 res.status(200).json("Khôi phục dữ liệu thành công")
