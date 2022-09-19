@@ -72,14 +72,23 @@ class ServiceController {
         }
     }
 
+    async getServiceManager(req, res) {
+        try {
+            const service = await Service.findOneWithDeleted({_id: req.params.id})
+            res.status(200).json(service)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async deleteService(req, res) {
         try {
-            const existedService = await Service.findOne({name: req.body.name})
+            const existedService = await Service.findById(req.params.id)
             if(existedService) {
                 await existedService.delete()
                 res.status(200).json("Xóa dịch vụ thành công")
             } else {
-                res.status(400).json("Linh kiện không còn tồn tại")
+                res.status(400).json("Dịch vụ không tồn tại")
             }
         } catch (err) {
             res.status(500).json(err)
@@ -88,11 +97,11 @@ class ServiceController {
 
     async restoreService(req, res) {
         try {
-            const existedService = await Service.findOne({name: req.body.name})
+            const existedService = await Service.findById(req.params.id)
             if(existedService) {
                 res.status(400).json("Dịch vụ vẫn còn tồn tại")
             } else {
-                await Service.restore({name: req.body.name})
+                await Service.restore({_id: req.params.id})
                 res.status(200).json("Khôi phục dữ liệu thành công")
             }
         } catch (err) {

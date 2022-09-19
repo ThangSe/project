@@ -179,14 +179,24 @@ class AccessoriesController {
             res.status(500).json(err)
         }
     }
+
+    async getAccessoryManager(req, res) {
+        try {
+            const accessory = await Accessory.findOneWithDeleted({_id: req.params.id}).populate("supplier_id")
+            res.status(200).json(accessory)
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async deleteAccessory(req, res) {
         try {
-            const existedAccessory = await Accessory.findOne({name: req.body.name})
+            const existedAccessory = await Accessory.findById(req.params.id)
             if(existedAccessory) {
                 await existedAccessory.delete()
                 res.status(200).json("Xóa linh kiện thành công")
             } else {
-                res.status(400).json("Linh kiện không còn tồn tại")
+                res.status(400).json("Linh kiện không tồn tại")
             }
         } catch (err) {
             res.status(500).json(err)
@@ -195,11 +205,11 @@ class AccessoriesController {
 
     async restoreAccessory(req, res) {
         try {
-            const existedAccessory = await Accessory.findOne({name: req.body.name})
+            const existedAccessory = await Accessory.findById(req.params.id)
             if(existedAccessory) {
                 res.status(400).json("Linh kiện vẫn còn tồn tại")
             } else {
-                await Accessory.restore({name: req.body.name})
+                await Accessory.restore({_id: req.params.id})
                 res.status(200).json("Khôi phục dữ liệu thành công")
             }
         } catch (err) {
