@@ -3,8 +3,17 @@ const Accessory = require('../models/Accessory')
 const Supplier = require('../models/Supplier')
 const multer = require('multer')
 const {storage, fileFind, deletedFile} = require('../../config/db/upload')
+const {rightTime} = require('../../config/helper/index')
 
 class AccessoriesController {
+    test(req, res) {
+        try {
+            console.log(rightTime())
+            res.status(200).json(rightTime())
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
     //GET /accessory/all-accessories
     showAllAccessory(req, res, next) {
         Accessory.findWithDeleted().populate("supplier_id")
@@ -195,13 +204,17 @@ class AccessoriesController {
 
     async deleteAccessory(req, res) {
         try {
-            const existedAccessory = await Accessory.findById(req.params.id)
-            if(existedAccessory) {
-                await existedAccessory.delete()
-                res.status(200).json("Xóa linh kiện thành công")
+            if(rightTime()) {
+                const existedAccessory = await Accessory.findById(req.params.id)
+                if(existedAccessory) {
+                    await existedAccessory.delete()
+                    res.status(200).json("Xóa linh kiện thành công")
+                } else {
+                    res.status(400).json("Linh kiện không hoạt động")
+                }
             } else {
-                res.status(400).json("Linh kiện không hoạt động")
-            }
+                res.status(400).json("Không thể xóa trong giờ làm việc")
+            }         
         } catch (err) {
             res.status(500).json(err)
         }

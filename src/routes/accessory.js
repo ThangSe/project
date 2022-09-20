@@ -3,6 +3,7 @@ const middlewareController = require("../app/controllers/MiddlewareController")
 const imgFunc = require("../config/db/upload")
 const router = require("express").Router()
 
+router.get("/test", accessoriesController.test)
 router.get("/all-accessories", middlewareController.verifyTokenManager, accessoriesController.showAllAccessory)
 router.get("/all-accessories-for-customer", middlewareController.verifyToken, accessoriesController.getAllAccessoryForCus)
 router.get("/all-accessories-by-type", middlewareController.verifyToken, accessoriesController.showAllAccessoryByType)

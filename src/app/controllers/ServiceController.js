@@ -1,5 +1,5 @@
-const Accessory = require('../models/Accessory')
 const Service = require('../models/Service')
+const {rightTime} = require('../../config/helper/index')
 
 class ServiceController {
     //GET /service/all-service
@@ -87,13 +87,17 @@ class ServiceController {
 
     async deleteService(req, res) {
         try {
-            const existedService = await Service.findById(req.params.id)
-            if(existedService) {
-                await existedService.delete()
-                res.status(200).json("Xóa dịch vụ thành công")
+            if(rightTime()) {
+                const existedService = await Service.findById(req.params.id)
+                if(existedService) {
+                    await existedService.delete()
+                    res.status(200).json("Xóa dịch vụ thành công")
+                } else {
+                    res.status(400).json("Dịch vụ không hoạt động")
+                }
             } else {
-                res.status(400).json("Dịch vụ không hoạt động")
-            }
+                res.status(400).json("Không thể xóa trong giờ làm việc")
+            }            
         } catch (err) {
             res.status(500).json(err)
         }

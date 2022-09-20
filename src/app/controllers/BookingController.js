@@ -1,7 +1,27 @@
 const Booking = require('../models/Booking')
+const Service = require('../models/Service')
 const Account = require("../models/Account")
 const Order = require("../models/Order")
 const Buffer = require('buffer/').Buffer
+const checkServices = async (booking) => {
+    var count = 0
+    const services = booking.services
+    for(const service of services) {
+        const a = await Service.findOne({name: service.name})
+        if(!a) {
+            if(!service.deleted) {
+                service.deleted = true
+                count++    
+            }
+        }
+    }
+    if(count == 0) {
+        return booking
+    } else {
+        await booking.updateOne({$set: {services: services}}, {new: true})
+        return booking
+    }
+}
 class BookingController {
     async showAll (req, res) {
         try {
@@ -196,19 +216,20 @@ class BookingController {
         const acc_id = accountInfo.id
         Booking.find({acc_id: acc_id}).sort({_id:-1})
             .then(bookings => {
-                res.json(bookings)
+                res.status(200).json(bookings)
             })
             .catch(next)
     }
-    searchBookingById(req, res, next) {
-        Booking.findById(req.params.id).populate({
-            path: 'acc_id',
-            select: 'username'
-        })
-            .then(booking => {
-                res.json(booking)
+    async searchBookingById(req, res) {
+        try {
+            const booking = await Booking.findById(req.params.id).populate({
+                path: 'acc_id',
+                select: 'username'
             })
-            .catch(next)
+            res.status(200).json(await checkServices(booking))
+        } catch (err) {
+            res.status(500).json(err)
+        }
     }
 
     async getBookingByIdForCus(req, res) {
@@ -221,7 +242,7 @@ class BookingController {
                 path: 'order_id',
                 model: 'order',
              }])
-             res.status(200).json(booking)
+             res.status(200).json(await checkServices(booking))
         } catch (err) {
             res.status(500).json(err)
         }
