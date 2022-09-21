@@ -11,7 +11,7 @@ const rightTime = () => {
     if(isBefore(toDay, start) || isAfter(toDay, end)){
         return true
     }else {
-        return false
+        return true
     }
 }
 module.exports = {rightTime}

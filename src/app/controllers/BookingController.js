@@ -11,7 +11,12 @@ const checkServices = async (booking) => {
         if(!a) {
             if(!service.deleted) {
                 service.deleted = true
-                count++    
+                count++
+            }
+        } else if(a) {
+            if(service.deleted) {
+                service.deleted = false
+                count ++
             }
         }
     }
