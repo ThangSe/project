@@ -237,6 +237,19 @@ class BookingController {
         }
     }
 
+    async searchBookingWithOrderById(req, res) {
+        try {
+            const booking = await Booking.findById(req.params.id).populate([{
+                path: 'order_id',
+                model: 'order',
+                select: 'totalPrice status orderDetails_id work_slot computer_id'
+             }])
+            res.status(200).json(await checkServices(booking))
+        } catch (err) {
+            res.status(500).json(err)
+        }
+    }
+
     async getBookingByIdForCus(req, res) {
         try {
              const bookingId = req.params.id

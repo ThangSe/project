@@ -6,6 +6,7 @@ router.get('/all', middlewareController.verifyTokenManager, bookingController.sh
 router.get('/with-order-status/all', middlewareController.verifyTokenManager, bookingController.showAllBookingWithOrderInfo)
 router.get('/all/bookings-account', middlewareController.verifyToken, bookingController.showAllBookingByAccount)
 router.get('/search/:id', middlewareController.verifyTokenStaff, bookingController.searchBookingById)
+router.get('/with-order/:id', middlewareController.verifyTokenManager, bookingController.searchBookingWithOrderById)
 router.post('/create', middlewareController.verifyToken, bookingController.createBookingCustomer)
 router.post('/create-booking-manager', middlewareController.verifyTokenManager, bookingController.createBookingManager)
 router.put('/update/:id', middlewareController.verifyToken, bookingController.updateBookingByIdForCus)
