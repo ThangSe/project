@@ -4,28 +4,27 @@ const Account = require("../models/Account")
 const Order = require("../models/Order")
 const Buffer = require('buffer/').Buffer
 const checkServices = async (booking) => {
-    var count = 0
-    const services = booking.services
-    for(const service of services) {
-        const a = await Service.findOne({name: service.name})
-        if(!a) {
-            if(!service.deleted) {
-                service.deleted = true
-                count++
-            }
-        } else if(a) {
-            if(service.deleted) {
-                service.deleted = false
-                count ++
+    if(booking.services.length > 0) {
+        const convertSerivces = booking.services.map(function(service) {
+            return {name: service, deleted: false}
+        })
+        for(const service of convertSerivces) {
+            const a = await Service.findOne({name: service.name})
+            if(!a) {
+                if(!service.deleted) {
+                    service.deleted = true
+                }
+            } else if(a) {
+                if(service.deleted) {
+                    service.deleted = false
+                }
             }
         }
-    }
-    if(count == 0) {
+        booking.services = convertSerivces
         return booking
     } else {
-        await booking.updateOne({$set: {services: services}}, {new: true})
         return booking
-    }
+    }   
 }
 class BookingController {
     async showAll (req, res) {
@@ -260,7 +259,7 @@ class BookingController {
                 path: 'order_id',
                 model: 'order',
              }])
-             res.status(200).json(await checkServices(booking))
+             res.status(200).json(booking)
         } catch (err) {
             res.status(500).json(err)
         }

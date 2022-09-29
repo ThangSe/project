@@ -4,10 +4,7 @@ const Schema = mongoose.Schema
 
 const Booking = new Schema({
     cus_name: {type: String, required: true},
-    services: [{
-        name: {type: String, required: true},
-        deleted: {type: Boolean, default: false}
-    }],
+    services: {type: Array},
     description: {type: String},
     type: {type: String, required: true, default: 'Sửa tại nhà'},
     cus_address: {
