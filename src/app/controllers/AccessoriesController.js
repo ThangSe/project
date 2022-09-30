@@ -6,14 +6,6 @@ const {storage, fileFind, deletedFile} = require('../../config/db/upload')
 const {rightTime} = require('../../config/helper/index')
 
 class AccessoriesController {
-    test(req, res) {
-        try {
-            console.log(rightTime())
-            res.status(200).json(rightTime())
-        } catch (err) {
-            res.status(500).json(err)
-        }
-    }
     //GET /accessory/all-accessories
     showAllAccessory(req, res, next) {
         Accessory.findWithDeleted().populate("supplier_id")

@@ -353,7 +353,7 @@ class BookingController {
     //PATCH /booking/accept-booking (Manager)
     async acceptBooking(req, res) {
         try {
-            const booking = await Booking.findById(req.body.id)
+            const booking = await Booking.findById(req.params.id)
             if(booking.status == "Đang xử lí") {
                 await booking.updateOne({$set: {status: 'Đã tiếp nhận'}})
                 const order = new Order()
@@ -375,7 +375,7 @@ class BookingController {
             const accountInfo = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString())
             const acc_id = accountInfo.id
             const booking = await Booking.findOne({$and:[
-                {_id: req.body.id},
+                {_id: req.params.id},
                 {acc_id: acc_id}
             ]}).populate("order_id")
             if(booking.status == "Đang xử lí") {

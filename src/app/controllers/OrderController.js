@@ -552,7 +552,7 @@ class OrderController {
             }
         }
     }
-    async acceptOrder(req, res, next) {
+    async acceptOrder(req, res) {
         try {
             const order = await Order.findById(req.params.id)
             if(order.status == 'Chờ xác nhận'){
@@ -568,7 +568,7 @@ class OrderController {
     }
     async acceptOrderByCus(req, res) {
         try {
-            const order = await Order.findById(req.body.id)
+            const order = await Order.findById(req.params.id)
             if(order.status == 'Quản lí xác nhận'){
                 await order.updateOne({$set: {status: 'Hoàn tất hóa đơn'}})
                 res.status(200).json("Đơn hàng đã hoàn tất")
@@ -583,7 +583,7 @@ class OrderController {
 
     async cancelOrder(req, res) {
         try {
-            const order = await Order.findById(req.body.id)
+            const order = await Order.findById(req.params.id)
             if(order.work_slot){
                 await WorkSlot.findByIdAndUpdate({_id: order.work_slot}, {$set: {status: 'open'}})
             }
@@ -595,7 +595,7 @@ class OrderController {
     }
     async completeOrder(req, res) {
         try {
-            const order = await Order.findById(req.body.id)
+            const order = await Order.findById(req.params.id)
             if(order.status == 'Hoàn tất hóa đơn'){
                 await order.updateOne({$set: {status: 'Hoàn thành'}})
                 res.status(200).json("Đơn hàng đã hoàn thành")
