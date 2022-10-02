@@ -14,8 +14,6 @@ class ChartController {
             const types = req.body.types    
             const filter = req.body.filter
             const dates = datesStr.map(d => new Date(d))
-            console.log(dates)
-            
             const data = []
             if(types.indexOf("totalbooking") > -1 && filter == 'bydate') {
                 const counts = []         

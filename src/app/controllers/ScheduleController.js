@@ -11,6 +11,8 @@ const Buffer = require('buffer/').Buffer
 const _ = require('lodash');
 const startOfWeek = require('date-fns/startOfWeek')
 const endOfWeek = require('date-fns/endOfWeek')
+const startOfDay = require('date-fns/startOfDay')
+const endOfDay = require('date-fns/endOfDay')   
 const add = require('date-fns/add')
 
 class ScheduleController {
@@ -289,8 +291,8 @@ class ScheduleController {
         try {
             const scheduleOneWeekFromNow = await Schedule.find({
                 date: {
-                    $gte: new Date(),
-                    $lte: new Date(new Date().valueOf() + 604800000)
+                    $gte: startOfDay(new Date()),
+                    $lte: endOfDay(new Date(new Date().valueOf() + 604800000))
                 }
             }).sort({date: 1}).populate("slots")
             res.status(200).json(scheduleOneWeekFromNow)
