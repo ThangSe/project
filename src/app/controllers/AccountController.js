@@ -44,12 +44,16 @@ class AccountController {
         
     }
     //GET /account/all
-    getAllAccounts(req, res, next) {
-        Account.find({}).populate("booking")
-            .then(accounts => {
-                res.status(200).json(accounts)
-            })
-            .catch(next)
+    async getAllAccounts(req, res) {
+        try {
+            const {page = 1, limit = 10} = req.query
+            let accounts = await Account.find().limit(limit * 1).skip((page - 1) * limit)
+            let count = await Account.find().count()/10
+            res.status(200).json({count: Math.ceil(count), accounts})
+        } catch (err) {
+            res.status(500).json(err)
+        }
+            
     }
     //GET /account/account-detail
     getAllAccountsDetail(req, res, next) {
